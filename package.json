@@ -1,0 +1,31 @@
+{
+  "name": "td-genetic",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Jérémie Metter-Rothan",
+  "license": "MIT",
+  "dependencies": {
+    "reset-css": "^4.0.1",
+    "three": "^0.98.0",
+    "three-orbitcontrols": "^2.96.3"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.1",
+    "babel-polyfill": "^6.26.0",
+    "css-loader": "^1.0.0",
+    "eslint": "^5.10.0",
+    "file-loader": "^2.0.0",
+    "html-webpack-plugin": "^3.2.0",
+    "node-sass": "^4.9.3",
+    "sass-loader": "^7.1.0",
+    "style-loader": "^0.23.0",
+    "webpack": "^4.20.1",
+    "webpack-cli": "^3.1.1",
+    "webpack-dev-server": "^3.1.9",
+    "webpack-glsl-loader": "^1.0.1"
+  },
+  "scripts": {
+    "dev": "webpack-dev-server --mode=development --watch",
+    "prod": "webpack --mode=production"
+  }
+}

@@ -1,0 +1,86 @@
+
+export const normalize = (dataset) => {
+  const min = dataset.reduce((a, b) => Math.min(a, b));
+  const max = dataset.reduce((a, b) => Math.max(a, b));
+
+  return dataset.map(val => (val - min) / (max - min));
+}
+
+class Genotype
+{
+  constructor(data) {
+    this.data = data;
+    this.fitness = -1;
+  }
+
+  /**
+   * Mutate genotypes
+   * @param {number} p Mutation chance
+   * @return {Genotype} mutated phenotype 
+   */
+  mutate(p){
+    const temp = this.data.map(bit => {
+      if (Math.random() >= 1 - p) { return bit === 1 ? 0 : 1; }
+      return bit;
+    });
+
+    return new Genotype(temp);
+  }
+
+  /**
+   * Crossover 2 genotypes
+   * @param {Genotype} p
+   * @return {Array<Genotype>} Siblings
+   */
+  crossWith(p) {
+    if (this.data.length !== p.data.length) { throw new Error('Incompatible genotypes'); }
+    
+    const index = Math.floor(Math.random() * this.data.length);
+
+    const out = new Array(2);
+    out[0] = [...this.data.slice(0, index), ...p.data.slice(index)];
+    out[1] = [...p.data.slice(0, index), ...this.data.slice(index)];
+
+    return out; 
+  }
+
+  /**
+   * Evaluation fitness of a phenotype
+   * @param {number[]} blueprint
+   * @return {number} fitness score
+   */
+  evaluate (blueprint) {
+    if (this.data.length !== blueprint.length) { throw new Error('Incompatible genotypes'); }
+    return blueprint.reduce((acc, val, i) => acc + (this.data[i] !== val ? 1 : 0), 0);
+  }
+
+  /**
+   * Creates a random genotype
+   * @param {number} size Number of bits
+   * @return {Genotype} 
+   */
+  static create(size) {
+    return new Genotype(Genotype.createRandomData(size).next().value);
+  }
+
+  /**
+   * Creates a random genotype data set
+   * @param {number} size Number of bits
+   * @return {IterableIterator<Uint8Array>} 
+   */
+  static * createRandomData(size) {
+    yield new Uint8Array(size).map(() => Math.random() >= 0.5 ? 0 : 1);
+  }
+
+  /**
+   * Create a whole population of genotypes
+   * @param {number} n
+   * @param {number} size
+   * @return {Array<Genotype>}
+   */
+  static createPopulation(n, size) {
+    return new Array(n).fill(undefined).map(() => Genotype.create(size));
+  }
+}
+
+export default Genotype;
