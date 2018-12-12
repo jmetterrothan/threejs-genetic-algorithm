@@ -11,11 +11,14 @@ class Population
     }
 
     evaluate(target) {
-        const result = this.genotypes.map(genotype => genotype.evaluate(target));
-        
+        const results = this.genotypes.map(genotype => genotype.evaluate(target));
         // keep values in a range bewteen 0 - 1 so our fitness is relative to the whole population
-        const normalizedResult = normalize(result);
-        this.genotypes.forEach((genotype, i) => genotype.fitness = normalizedResult[i]);
+        const normalizedResults = normalize(results);
+
+        this.genotypes.forEach((genotype, i) => {
+            genotype.score = results[i];
+            genotype.fitness = normalizedResults[i];
+        });
     }
 }
 

@@ -1,4 +1,6 @@
 
+import assert from 'assert';
+
 export const normalize = (dataset) => {
   const min = dataset.reduce((a, b) => Math.min(a, b));
   const max = dataset.reduce((a, b) => Math.max(a, b));
@@ -11,6 +13,7 @@ class Genotype
   constructor(data) {
     this.data = data;
     this.fitness = -1;
+    this.score = -1;
   }
 
   /**
