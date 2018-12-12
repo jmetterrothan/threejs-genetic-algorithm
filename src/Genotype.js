@@ -33,7 +33,7 @@ class Genotype
    * @return {Array<Genotype>} Siblings
    */
   crossWith(p) {
-    if (this.data.length !== p.data.length) { throw new Error('Incompatible genotypes'); }
+    assert(this.data.length === p.length, 'Incompatible genotypes');
     
     const index = Math.floor(Math.random() * this.data.length);
 
@@ -50,7 +50,8 @@ class Genotype
    * @return {number} fitness score
    */
   evaluate (blueprint) {
-    if (this.data.length !== blueprint.length) { throw new Error('Incompatible genotypes'); }
+    assert(this.data.length === blueprint.length, 'Incompatible genotypes');
+
     return blueprint.reduce((acc, val, i) => acc + (this.data[i] !== val ? 1 : 0), 0);
   }
 

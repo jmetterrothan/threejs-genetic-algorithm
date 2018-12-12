@@ -10,6 +10,7 @@
     "three-orbitcontrols": "^2.96.3"
   },
   "devDependencies": {
+    "assert": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "babel-polyfill": "^6.26.0",
     "css-loader": "^1.0.0",
