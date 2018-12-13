@@ -10,6 +10,10 @@ class Population
         this.generation = 0;
     }
 
+    /**
+     * Evaluate the whole population
+     * @param {number[]} target 
+     */
     evaluate(target) {
         const results = this.genotypes.map(genotype => genotype.evaluate(target));
         // keep values in a range bewteen 0 - 1 so our fitness is relative to the whole population
@@ -19,6 +23,14 @@ class Population
             genotype.score = results[i];
             genotype.fitness = normalizedResults[i];
         });
+    }
+
+    selectBestCandidates(threshold) {
+        this.genotypes = this.genotypes.filter(genotype => genotype.fitness <= threshold);
+    }
+
+    size() {
+        return this.genotypes.length;
     }
 }
 
@@ -100,15 +112,42 @@ class TDState extends State
             1, 1, 1, 1, 1, 1, 1, 1,
             1, 1, 1, 1, 1, 1, 1, 1,
             1, 1, 1, 1, 1, 1, 1, 1,
-            0, 0, 0, 0, 0, 1, 0, 0,
-            0, 0, 0, 0, 0, 1, 0, 0,
-            0, 0, 0, 0, 0, 1, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 0,
         ];
 
-        let population = new Population(128, 48);
+        let population = new Population(64, 48);
         population.evaluate(target);
-        console.log(population)
+
+        while (population.generation < 32) {
+            if (population.size() <= 1) {
+                break;
+            }
+            
+            population.generation++;
+            population.selectBestCandidates(0.5);
+
+            // children
+            const temp = [];
+            for (let i = 0; i < population.size(); i += 2) {
+                if (population.genotypes[i] && population.genotypes[i + 1]) {
+                    const child = population.genotypes[i].crossWith(population.genotypes[i + 1]);
+                    temp.push(...child);
+                }
+            }
+            population.genotypes.push(...temp);
+
+            // mutate
+            population.genotypes.forEach(genotype => {
+                genotype.mutate(0.1);
+            });
+
+            population.evaluate(target);
+        }
+        
         show(population);
+        console.log(population)
     }
     update() { }
 }
