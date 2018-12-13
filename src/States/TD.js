@@ -47,18 +47,18 @@ class TDState extends State
         * -- Width (8 bits : 0 - 255)
         * -- Height (8 bits : 0 - 255)
         * -- Depth (8 bits : 0 - 255)
-        * 11111111|11111111|11111111|0100|0100|0100
+        * 1111 1111|1111 1111|1111 1111|0000 1000|0000 1000|0000 1000
         */
 
         const decode = (genotype) => {
             const color = new THREE.Color();
-            color.r = Number(parseInt(genotype.data.slice(0, 9).join(''), 2)) / 256;
-            color.g = Number(parseInt(genotype.data.slice(9, 17).join(''), 2)) / 256;
-            color.b = Number(parseInt(genotype.data.slice(17, 25).join(''), 2)) / 256;
-
-            const width = Number(parseInt(genotype.data.slice(25, 33).join(''), 2));
-            const height = Number(parseInt(genotype.data.slice(33, 41).join(''), 2));
-            const depth = Number(parseInt(genotype.data.slice(41).join(''), 2));
+            color.r = Number(parseInt(genotype.data.slice(0, 8).join(''), 2)) / 255;
+            color.g = Number(parseInt(genotype.data.slice(8, 16).join(''), 2)) / 255;
+            color.b = Number(parseInt(genotype.data.slice(16, 24).join(''), 2)) / 255;
+            
+            const width = Number(parseInt(genotype.data.slice(24, 32).join(''), 2));
+            const height = Number(parseInt(genotype.data.slice(32, 40).join(''), 2));
+            const depth = Number(parseInt(genotype.data.slice(40).join(''), 2));
 
             return { width, height, depth, color };
         };
