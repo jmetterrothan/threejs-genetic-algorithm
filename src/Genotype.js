@@ -32,17 +32,17 @@ class Genotype
 
   /**
    * Crossover 2 genotypes
-   * @param {Genotype} p
+   * @param {Genotype} genotype
    * @return {Array<Genotype>} Siblings
    */
-  crossWith(p) {
-    assert(this.data.length === p.length, 'Incompatible genotypes');
+  crossWith(genotype) {
+    assert(this.data.length === genotype.data.length, 'Incompatible genotypes');
     
     const index = Math.floor(Math.random() * this.data.length);
 
     const out = new Array(2);
-    out[0] = [...this.data.slice(0, index), ...p.data.slice(index)];
-    out[1] = [...p.data.slice(0, index), ...this.data.slice(index)];
+    out[0] = new Genotype([...this.data.slice(0, index), ...genotype.data.slice(index)]);
+    out[1] = new Genotype([...genotype.data.slice(0, index), ...this.data.slice(index)]);
 
     return out; 
   }
