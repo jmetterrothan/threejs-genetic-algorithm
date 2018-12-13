@@ -1,38 +1,9 @@
 import * as THREE from 'three';
+import assert from 'assert';
 
 import State from './State';
-import Genotype, { normalize } from '../Genotype';
-
-class Population
-{
-    constructor(n, size) {
-        this.genotypes = Genotype.createPopulation(n, size);
-        this.generation = 0;
-    }
-
-    /**
-     * Evaluate the whole population
-     * @param {number[]} target 
-     */
-    evaluate(target) {
-        const results = this.genotypes.map(genotype => genotype.evaluate(target));
-        // keep values in a range bewteen 0 - 1 so our fitness is relative to the whole population
-        const normalizedResults = normalize(results);
-
-        this.genotypes.forEach((genotype, i) => {
-            genotype.score = results[i];
-            genotype.fitness = normalizedResults[i];
-        });
-    }
-
-    selectBestCandidates(threshold) {
-        this.genotypes = this.genotypes.filter(genotype => genotype.fitness <= threshold);
-    }
-
-    size() {
-        return this.genotypes.length;
-    }
-}
+import Population from '../Population';
+import GenotypeBlueprint from '../GenotypeBlueprint';
 
 class TDState extends State
 {
@@ -43,7 +14,7 @@ class TDState extends State
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
         this.scene.add(ambientLight);
 
-        this.wrapper.camera.position.set(0, 0, 1500);
+        this.wrapper.camera.position.set(0, 0, 500);
         this.wrapper.controls.enabled = true;
         this.wrapper.controls.update();
 
@@ -62,19 +33,17 @@ class TDState extends State
         * 1111 1111|1111 1111|1111 1111|0000 1000|0000 1000|0000 1000
         */
 
-        const decode = (genotype) => {
-            const color = new THREE.Color();
-            color.r = Number(parseInt(genotype.data.slice(0, 8).join(''), 2)) / 255;
-            color.g = Number(parseInt(genotype.data.slice(8, 16).join(''), 2)) / 255;
-            color.b = Number(parseInt(genotype.data.slice(16, 24).join(''), 2)) / 255;
-            
-            const width = Number(parseInt(genotype.data.slice(24, 32).join(''), 2));
-            const height = Number(parseInt(genotype.data.slice(32, 40).join(''), 2));
-            const depth = Number(parseInt(genotype.data.slice(40).join(''), 2));
+       const cubeBlueprint = new GenotypeBlueprint();
 
-            return { width, height, depth, color };
-        };
+       cubeBlueprint.addTrait('r', 8, GenotypeBlueprint.INTEGER, 255, value => value / 255);
+       cubeBlueprint.addTrait('g', 8, GenotypeBlueprint.INTEGER, 0, value => value / 255);
+       cubeBlueprint.addTrait('b', 8, GenotypeBlueprint.INTEGER, 0, value => value / 255);
+       cubeBlueprint.addTrait('width', 8, GenotypeBlueprint.INTEGER, 16);
+       cubeBlueprint.addTrait('height', 8, GenotypeBlueprint.INTEGER, 16);
+       cubeBlueprint.addTrait('depth', 8, GenotypeBlueprint.INTEGER, 16);
 
+       cubeBlueprint.updateTargetModel();
+       
         const show = (population) => {
             this.wrapper.clean();
 
@@ -82,13 +51,12 @@ class TDState extends State
             group.shouldBeDeletedOnCleanUp = true;
     
             population.genotypes.forEach((genotype, i) => {
-                const data = decode(genotype);
-                const fit = genotype.fitness <= 0.25
-                const opacity = fit ? 1 : 0.125;
+                const data = cubeBlueprint.decode(genotype);
+                const opacity = (population.size <= 1 || genotype.score === 0) ? 1 : 0.2; // Math.max(1 - genotype.score / genotype.data.length, 0.2);
                 
                 const geometry = new THREE.BoxGeometry(data.width, data.height, data.depth);
                 const material = new THREE.MeshLambertMaterial({
-                    color: data.color, 
+                    color: new THREE.Color(data.r, data.g, data.b), 
                     transparent: true, 
                     opacity: opacity
                 });
@@ -97,53 +65,48 @@ class TDState extends State
                 cube.castShadow = true;
                 cube.receiveShadow = true;
     
-                const row = Math.floor(i / 12);
-                const col = i % 12;
-                cube.position.set(col * 255, fit ? 512 : 0, row * 255);
+                const row = Math.floor(i / 32);
+                const col = i % 32;
+                cube.position.set(col * 255, 0, row * 255);
+
+                if (population.size <= 1 || genotype.score === 0) {
+                    this.wrapper.controls.target = new THREE.Vector3(col * 255, 0, row * 255);
+                    this.wrapper.camera.position.set(col * 255, 100, row * 255);
+                }
                 
                 group.add(cube);
             });
     
-            new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
+            //new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
             this.scene.add(group);
         }
 
-        const target = [
-            1, 1, 1, 1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1, 1, 1, 1,
-            0, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 0, 1, 0, 0, 0,
-        ];
+        let population = new Population(30000, cubeBlueprint.size);
+        population.evaluate(cubeBlueprint);
 
-        let population = new Population(64, 48);
-        population.evaluate(target);
-
-        while (population.generation < 32) {
-            if (population.size() <= 1) {
-                break;
-            }
-            
+        while (population.generation < 25) {
             population.generation++;
-            population.selectBestCandidates(0.5);
+            population.evaluate(cubeBlueprint);
+
+            const selection = population.selectBestCandidates(Math.floor(population.size() * 0.25));
+
+            if (population.hasTarget(cubeBlueprint) > 0) { console.log('ok'); break; }
+            if (selection.length <= 0) { break; }
 
             // children
-            const temp = [];
-            for (let i = 0; i < population.size(); i += 2) {
-                if (population.genotypes[i] && population.genotypes[i + 1]) {
-                    const child = population.genotypes[i].crossWith(population.genotypes[i + 1]);
-                    temp.push(...child);
+            for (let i = 0, n = selection.length; i < n; i += 2) {
+                if (selection[i] && selection[i + 1]) {
+                    const child = selection[i].crossWith(selection[i + 1]);
+                    selection.push(...child);
                 }
             }
-            population.genotypes.push(...temp);
 
             // mutate
-            population.genotypes.forEach(genotype => {
-                genotype.mutate(0.1);
+            selection.forEach(genotype => {
+                genotype.mutate(0.15);
             });
 
-            population.evaluate(target);
+            population.genotypes = selection;
         }
         
         show(population);

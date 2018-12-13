@@ -1,6 +1,6 @@
 
 import assert from 'assert';
-
+import GenotypeBlueprint from './GenotypeBlueprint';
 export const normalize = (dataset) => {
   const min = dataset.reduce((a, b) => Math.min(a, b));
   const max = dataset.reduce((a, b) => Math.max(a, b));
@@ -36,6 +36,7 @@ class Genotype
    * @return {Array<Genotype>} Siblings
    */
   crossWith(genotype) {
+    assert(genotype instanceof Genotype, 'You must provide a genotype to cross with');
     assert(this.data.length === genotype.data.length, 'Incompatible genotypes');
     
     const index = Math.floor(Math.random() * this.data.length);
@@ -49,13 +50,14 @@ class Genotype
 
   /**
    * Evaluation fitness of a phenotype
-   * @param {number[]} blueprint
+   * @param {GenotypeBlueprint} blueprint
    * @return {number} fitness score
    */
   evaluate (blueprint) {
-    assert(this.data.length === blueprint.length, 'Incompatible genotypes');
+    assert(blueprint instanceof GenotypeBlueprint, 'Blueprint must be an instanceof GenotypeBlueprint');
+    assert(this.data.length === blueprint.model.length, 'Incompatible model');
 
-    return blueprint.reduce((acc, val, i) => acc + (this.data[i] !== val ? 1 : 0), 0);
+    return blueprint.model.reduce((acc, val, i) => acc + (this.data[i] !== val ? 1 : 0), 0);
   }
 
   /**
