@@ -23,7 +23,7 @@ class Genotype
    */
   mutate(p){
     const temp = this.data.map(bit => {
-      if (Math.random() >= 1 - p) { return bit === 1 ? 0 : 1; }
+      if (Math.random() >= 1 - p) return bit === 1 ? 0 : 1;
       return bit;
     });
 

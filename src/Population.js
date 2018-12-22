@@ -12,7 +12,7 @@ class Population
 
     /**
      * Evaluate the whole population
-     * @param {number[]} target 
+     * @param {GenotypeBlueprint} blueprint 
      */
     evaluate(blueprint) {
         assert(blueprint instanceof GenotypeBlueprint, 'Blueprint must be an instanceof GenotypeBlueprint');
