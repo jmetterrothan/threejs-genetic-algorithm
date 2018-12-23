@@ -10,12 +10,17 @@ class TDState extends State
     constructor(sceneWrapper) {
         super(sceneWrapper);
 
+        this.delay = 350;
         this.nbPerRow = 6;
         this.cellsize = 750;
         this.basePopulationCount = 36;
     }
 
     init() {
+        this.layers = new THREE.Group();
+        this.layers.shouldBeDeletedOnCleanUp = true;
+        this.scene.add(this.layers);
+
         // init scene
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
         this.scene.add(directionalLight);
@@ -56,11 +61,12 @@ class TDState extends State
             this.show();
 
             const target = this.population.select(this.cubeBlueprint);
+
             // stop loop if we found the target specimen
             if (target === null) {
                 this.loop();
             }
-        }, 500);
+        }, this.delay);
     }
 
     /**
@@ -88,7 +94,7 @@ class TDState extends State
             const col = i % this.nbPerRow;
 
             const x = col * this.cellsize;
-            const y = this.population.generation * 750;
+            const y = 0;
             const z = row * this.cellsize;
 
             cube.position.set(x, y, z);
@@ -100,8 +106,13 @@ class TDState extends State
             group.add(cube);
         });
 
-        // new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
-        this.scene.add(group);
+        // center group
+        new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
+
+        // y position based on generation
+        group.position.y = this.population.generation * 750;
+
+        this.layers.add(group);
     }
 
     update() { }
