@@ -53,7 +53,7 @@ class TDState extends State
 
     loop() {
         setTimeout(() => {
-            this.show(this.population);
+            this.show();
 
             const target = this.population.select(this.cubeBlueprint);
             // stop loop if we found the target specimen
@@ -65,13 +65,12 @@ class TDState extends State
 
     /**
      * Place current population on a grid in 3d
-     * @param {Population} population
      */
-    show(population) {
+    show() {
         const group = new THREE.Group();
         group.shouldBeDeletedOnCleanUp = true;
 
-        population.genotypes.forEach((genotype, i) => {
+        this.population.genotypes.forEach((genotype, i) => {
             const data = this.cubeBlueprint.decode(genotype);
             
             const geometry = new THREE.BoxGeometry(data.width, data.height, data.depth);
@@ -89,12 +88,12 @@ class TDState extends State
             const col = i % this.nbPerRow;
 
             const x = col * this.cellsize;
-            const y = population.generation * 750;
+            const y = this.population.generation * 750;
             const z = row * this.cellsize;
 
             cube.position.set(x, y, z);
 
-            if (population.size <= 1 || genotype.score === 0) {
+            if (this.population.size <= 1 || genotype.score === 0) {
                 this.wrapper.camera.position.set(x, y, z);
             }
             
