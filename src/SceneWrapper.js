@@ -11,7 +11,7 @@ class SceneWrapper {
         this.renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
 
         this.controls = new THREE.PointerLockControls(this.camera);
-        this.speed = new THREE.Vector3(2500, 2500, 2500);
+        this.speed = new THREE.Vector3(3500, 3500, 3500);
         this.velocity = new THREE.Vector3(0, 0, 0);
 
         this.moveForward = false;

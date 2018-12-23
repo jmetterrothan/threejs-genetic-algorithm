@@ -6,8 +6,9 @@ import GenotypeBlueprint from './GenotypeBlueprint';
 
 class Population
 {
-    constructor(n, size) {
+    constructor(n, size, mutationRate) {
         this.genotypes = Genotype.createPopulation(n, size);
+        this.mutationRate = mutationRate;
         this.generation = 0;
     }
 
@@ -54,13 +55,13 @@ class Population
         }
 
         // mutate
-        this.genotypes = this.mutate(0.01, selection);
+        this.genotypes = this.mutate(this.mutationRate, selection);
 
         return null;
     }
 
     mutate(ratio, selection) {
-        return Utility.shuffleArray(selection).map(genotype => genotype.mutate(0.005));
+        return Utility.shuffleArray(selection).map(genotype => genotype.mutate(ratio));
     }
 
     hasTarget() {

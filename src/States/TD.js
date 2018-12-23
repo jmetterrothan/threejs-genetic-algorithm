@@ -12,7 +12,7 @@ class TDState extends State
 
         this.delay = 350;
         this.nbPerRow = 6;
-        this.cellsize = 750;
+        this.cellsize = 1000;
         this.basePopulationCount = 36;
     }
 
@@ -20,6 +20,10 @@ class TDState extends State
         this.layers = new THREE.Group();
         this.layers.shouldBeDeletedOnCleanUp = true;
         this.scene.add(this.layers);
+
+        this.markers = new THREE.Group();
+        this.markers.shouldBeDeletedOnCleanUp = true;
+        this.scene.add(this.markers);
 
         // init scene
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
@@ -50,17 +54,17 @@ class TDState extends State
         this.cubeBlueprint.addTrait('height', 8, GenotypeBlueprint.INTEGER, 16);
         this.cubeBlueprint.addTrait('depth', 8, GenotypeBlueprint.INTEGER, 16);
 
-        this.population = new Population(this.basePopulationCount, this.cubeBlueprint.size);
+        this.population = new Population(this.basePopulationCount, this.cubeBlueprint.size, 0.0075);
         this.population.evaluate(this.cubeBlueprint);
 
+        this.show();
         this.loop();
     }
 
     loop() {
         setTimeout(() => {
-            this.show();
-
             const target = this.population.select(this.cubeBlueprint);
+            this.show();
 
             // stop loop if we found the target specimen
             if (target === null) {
@@ -87,6 +91,7 @@ class TDState extends State
             });
 
             const cube = new THREE.Mesh(geometry, material);
+            cube.shouldBeDeletedOnCleanUp = true;
             cube.castShadow = true;
             cube.receiveShadow = true;
 
@@ -98,11 +103,11 @@ class TDState extends State
             const z = row * this.cellsize;
 
             cube.position.set(x, y, z);
-
-            if (this.population.size <= 1 || genotype.score === 0) {
-                this.wrapper.camera.position.set(x, y, z);
-            }
             
+            if (genotype.score === 0) {
+                this.createMarkerAt(x, y + this.population.generation * 750, z);
+            }
+
             group.add(cube);
         });
 
@@ -113,6 +118,20 @@ class TDState extends State
         group.position.y = this.population.generation * 750;
 
         this.layers.add(group);
+    }
+
+    createMarkerAt(x, y, z) {
+        const markerGeometry = new THREE.BoxGeometry(8, 8, 8);
+        const markerMaterial = new THREE.MeshLambertMaterial({
+            color: new THREE.Color(0xffffff), 
+            transparent: true, 
+            opacity: 1.0
+        });
+
+        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+        marker.shouldBeDeletedOnCleanUp = true;
+        marker.position.set(x, y + 128, z);
+        this.markers.add(marker);
     }
 
     update() { }
