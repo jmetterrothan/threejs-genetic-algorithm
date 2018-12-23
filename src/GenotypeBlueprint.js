@@ -25,6 +25,7 @@ class GenotypeBlueprint
         }
 
         this.genes.push({ name, size, type, target, transform });
+        this.updateTargetModel();
     }
 
     updateTargetModel() {
@@ -65,6 +66,7 @@ class GenotypeBlueprint
         
         return out;
     }
+    
     get size() {
         return this.genes.reduce((value, gene) => value + gene.size, 0);
     }

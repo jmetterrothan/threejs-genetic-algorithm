@@ -1,6 +1,7 @@
 
 import assert from 'assert';
 import GenotypeBlueprint from './GenotypeBlueprint';
+
 export const normalize = (dataset) => {
   const min = dataset.reduce((a, b) => Math.min(a, b));
   const max = dataset.reduce((a, b) => Math.max(a, b));

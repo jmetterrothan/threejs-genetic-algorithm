@@ -2,15 +2,21 @@ import * as THREE from 'three';
 
 import State from './State';
 import Population from '../Population';
+import Genotype from '../Genotype';
 import GenotypeBlueprint from '../GenotypeBlueprint';
 
 class TDState extends State
 {
     constructor(sceneWrapper) {
         super(sceneWrapper);
+
+        this.nbPerRow = 6;
+        this.cellsize = 750;
+        this.basePopulationCount = 36;
     }
 
     init() {
+        // init scene
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
         this.scene.add(directionalLight);
 
@@ -19,7 +25,7 @@ class TDState extends State
 
         this.wrapper.camera.position.set(0, 0, 0);
 
-        /* algo 
+        /* init algo 
 
         1 byte => 8 bit
 
@@ -31,58 +37,30 @@ class TDState extends State
         * 1111 1111|1111 1111|1111 1111|0000 1000|0000 1000|0000 1000
         */
 
-       this.nbPerRow = 5;
-       this.cellsize = 750;
+        this.cubeBlueprint = new GenotypeBlueprint();
+        this.cubeBlueprint.addTrait('r', 8, GenotypeBlueprint.INTEGER, 255, value => value / 255);
+        this.cubeBlueprint.addTrait('g', 8, GenotypeBlueprint.INTEGER, 128, value => value / 255);
+        this.cubeBlueprint.addTrait('b', 8, GenotypeBlueprint.INTEGER, 0, value => value / 255);
+        this.cubeBlueprint.addTrait('width', 8, GenotypeBlueprint.INTEGER, 16);
+        this.cubeBlueprint.addTrait('height', 8, GenotypeBlueprint.INTEGER, 16);
+        this.cubeBlueprint.addTrait('depth', 8, GenotypeBlueprint.INTEGER, 16);
 
-       this.cubeBlueprint = new GenotypeBlueprint();
-
-       this.cubeBlueprint.addTrait('r', 8, GenotypeBlueprint.INTEGER, 255, value => value / 255);
-       this.cubeBlueprint.addTrait('g', 8, GenotypeBlueprint.INTEGER, 128, value => value / 255);
-       this.cubeBlueprint.addTrait('b', 8, GenotypeBlueprint.INTEGER, 0, value => value / 255);
-       this.cubeBlueprint.addTrait('width', 8, GenotypeBlueprint.INTEGER, 16);
-       this.cubeBlueprint.addTrait('height', 8, GenotypeBlueprint.INTEGER, 16);
-       this.cubeBlueprint.addTrait('depth', 8, GenotypeBlueprint.INTEGER, 16);
-
-       this.cubeBlueprint.updateTargetModel();
-
-        this.loop = true;
-        this.population = new Population(20, this.cubeBlueprint.size);
+        this.population = new Population(this.basePopulationCount, this.cubeBlueprint.size);
         this.population.evaluate(this.cubeBlueprint);
 
-        this.generationLoop();
+        this.loop();
     }
 
-    generationLoop() {
-        if (this.loop) {
-            setTimeout(() => {
-                this.population.generation++;
+    loop() {
+        setTimeout(() => {
+            this.show(this.population);
 
-                this.show(this.population);
-                this.generate();
-                this.generationLoop();
-            }, 500);
-        }
-    }
-    generate () {
-        this.population.evaluate(this.cubeBlueprint);
-
-        const selection = this.population.selectBestCandidates(Math.floor(this.population.size() * 0.5));
-
-        if (this.population.hasTarget(this.cubeBlueprint) || selection.length <= 0) {
-            this.loop = false;
-        }
-        else {
-            // children
-            for (let i = 0, n = selection.length; i < n; i += 2) {
-                if (selection[i] && selection[i + 1]) {
-                    const child = selection[i].crossWith(selection[i + 1]);
-                    selection.push(...child);
-                }
+            const target = this.population.select(this.cubeBlueprint);
+            // stop loop if we found the target specimen
+            if (target === null) {
+                this.loop();
             }
-
-            // mutate
-            this.population.genotypes = selection.map(genotype => genotype.mutate(0.005));
-        }
+        }, 500);
     }
 
     /**
@@ -116,7 +94,7 @@ class TDState extends State
 
             cube.position.set(x, y, z);
 
-            if (population.size() <= 1 || genotype.score === 0) {
+            if (population.size <= 1 || genotype.score === 0) {
                 this.wrapper.camera.position.set(x, y, z);
             }
             
@@ -126,6 +104,7 @@ class TDState extends State
         // new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
         this.scene.add(group);
     }
+
     update() { }
 }
 
