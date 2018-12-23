@@ -17,10 +17,10 @@ class TDState extends State
 
     init() {
         // init scene
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
         this.scene.add(directionalLight);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         this.scene.add(ambientLight);
 
         this.wrapper.camera.position.set(0, 0, 0);
