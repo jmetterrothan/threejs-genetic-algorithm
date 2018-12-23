@@ -58,7 +58,7 @@ class Population
         }
 
         // mutate
-        this.genotypes = this.mutate(0.005, selection);
+        this.genotypes = this.mutate(0.01, selection);
 
         return null;
     }
