@@ -2,13 +2,6 @@
 import assert from 'assert';
 import GenotypeBlueprint from './GenotypeBlueprint';
 
-export const normalize = (dataset) => {
-  const min = dataset.reduce((a, b) => Math.min(a, b));
-  const max = dataset.reduce((a, b) => Math.max(a, b));
-
-  return dataset.map(val => (val - min) / (max - min));
-}
-
 class Genotype
 {
   constructor(data) {
@@ -87,6 +80,13 @@ class Genotype
    */
   static createPopulation(n, size) {
     return new Array(n).fill(undefined).map(() => Genotype.create(size));
+  }
+
+  static normalize(dataset) {
+    const min = dataset.reduce((a, b) => Math.min(a, b));
+    const max = dataset.reduce((a, b) => Math.max(a, b));
+  
+    return dataset.map(val => (val - min) / (max - min));
   }
 }
 

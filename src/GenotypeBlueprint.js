@@ -1,11 +1,3 @@
-const convertBinaryArrayToInteger = (data) => {
-    return parseInt(data.join(''), 2);
-};
-
-const convertIntegerToBinaryArray = (value) => {
-    return Number(value).toString(2).split('').map(str => parseInt(str, 10));
-};
-
 class GenotypeBlueprint
 {
     constructor() {
@@ -17,7 +9,7 @@ class GenotypeBlueprint
         let target = new Uint8Array(size).fill(0);
 
         if (type === GenotypeBlueprint.INTEGER) {
-            const data = convertIntegerToBinaryArray(value);
+            const data = GenotypeBlueprint.convertIntegerToBinaryArray(value);
             
             for (let i = data.length; i >= 0; --i) {
                 target[size - (data.length - i)] = data[i];
@@ -52,7 +44,7 @@ class GenotypeBlueprint
 
             // convert raw binary values
             if (this.genes[i].type === GenotypeBlueprint.INTEGER) {
-                value = convertBinaryArrayToInteger(value);
+                value = GenotypeBlueprint.convertBinaryArrayToInteger(value);
             }
 
             // transform values
@@ -66,9 +58,17 @@ class GenotypeBlueprint
         
         return out;
     }
-    
+
     get size() {
         return this.genes.reduce((value, gene) => value + gene.size, 0);
+    }
+
+    static convertBinaryArrayToInteger(data) {
+        return parseInt(data.join(''), 2);
+    }
+    
+    static convertIntegerToBinaryArray(value) {
+        return Number(value).toString(2).split('').map(str => parseInt(str, 10));
     }
 }
 

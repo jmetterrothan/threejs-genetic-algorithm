@@ -1,12 +1,8 @@
 import assert from 'assert';
 
-import Genotype, { normalize } from './Genotype';
+import Utility from './utility';
+import Genotype from './Genotype';
 import GenotypeBlueprint from './GenotypeBlueprint';
-
-const shuffleArray = arr => arr
-  .map(a => [Math.random(), a])
-  .sort((a, b) => a[0] - b[0])
-  .map(a => a[1]);
 
 class Population
 {
@@ -24,7 +20,7 @@ class Population
 
         const results = this.genotypes.map(genotype => genotype.evaluate(blueprint));
         // keep values in a range bewteen 0 - 1 so our fitness is relative to the whole population
-        const normalizedResults = normalize(results);
+        const normalizedResults = Genotype.normalize(results);
 
         this.genotypes.forEach((genotype, i) => {
             genotype.score = results[i];
@@ -64,7 +60,7 @@ class Population
     }
 
     mutate(ratio, selection) {
-        return shuffleArray(selection).map(genotype => genotype.mutate(0.005));
+        return Utility.shuffleArray(selection).map(genotype => genotype.mutate(0.005));
     }
 
     hasTarget() {
