@@ -5,12 +5,12 @@ import Population from '../Population';
 import Genotype from '../Genotype';
 import GenotypeBlueprint from '../GenotypeBlueprint';
 
-class TDState extends State
+class CubeState extends State
 {
     constructor(sceneWrapper) {
         super(sceneWrapper);
 
-        this.delay = 350;
+        this.delay = 150;
         this.nbPerRow = 6;
         this.cellsize = 1000;
         this.basePopulationCount = 36;
@@ -21,10 +21,6 @@ class TDState extends State
         this.layers.shouldBeDeletedOnCleanUp = true;
         this.scene.add(this.layers);
 
-        this.markers = new THREE.Group();
-        this.markers.shouldBeDeletedOnCleanUp = true;
-        this.scene.add(this.markers);
-
         // init scene
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
         this.scene.add(directionalLight);
@@ -32,7 +28,10 @@ class TDState extends State
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         this.scene.add(ambientLight);
 
-        this.wrapper.camera.position.set(0, 0, 0);
+        const x = this.nbPerRow / 2 * this.cellsize;
+        const z = this.nbPerRow / 2 * this.cellsize;
+        const y = 0;
+        this.wrapper.controls.getObject().position.set(x, y, z);
 
         /* init algo 
 
@@ -103,16 +102,9 @@ class TDState extends State
             const z = row * this.cellsize;
 
             cube.position.set(x, y, z);
-            
-            if (genotype.score === 0) {
-                this.createMarkerAt(x, y + this.population.generation * 750, z);
-            }
-
+           
             group.add(cube);
         });
-
-        // center group
-        new THREE.Box3().setFromObject(group).getCenter(group.position).multiplyScalar(-1);
 
         // y position based on generation
         group.position.y = this.population.generation * 750;
@@ -120,21 +112,9 @@ class TDState extends State
         this.layers.add(group);
     }
 
-    createMarkerAt(x, y, z) {
-        const markerGeometry = new THREE.BoxGeometry(8, 8, 8);
-        const markerMaterial = new THREE.MeshLambertMaterial({
-            color: new THREE.Color(0xffffff), 
-            transparent: true, 
-            opacity: 1.0
-        });
-
-        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
-        marker.shouldBeDeletedOnCleanUp = true;
-        marker.position.set(x, y + 128, z);
-        this.markers.add(marker);
+    update(delta) {
+        
     }
-
-    update() { }
 }
 
-export default TDState;
+export default CubeState;
