@@ -5,8 +5,9 @@ class GenotypeBlueprint
         this.model = null;
     }
 
-    addTrait(name, size, type, value, transform = null) {
-        let target = new Uint8Array(size).fill(0);
+    addTrait(name, min, max, type, value, transform = null) {
+        const size = Math.floor(Math.log2(max - min)) + 1;
+        const target = new Uint8Array(size).fill(0);
 
         if (type === GenotypeBlueprint.INTEGER) {
             const data = GenotypeBlueprint.convertIntegerToBinaryArray(value);
@@ -16,7 +17,7 @@ class GenotypeBlueprint
             }
         }
 
-        this.genes.push({ name, size, type, target, transform });
+        this.genes.push({ name, min, max, size, type, target, transform });
         this.updateTargetModel();
     }
 

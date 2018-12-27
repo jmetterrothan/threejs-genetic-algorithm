@@ -4,6 +4,7 @@ import State from './State';
 import Population from '../Population';
 import Genotype from '../Genotype';
 import GenotypeBlueprint from '../GenotypeBlueprint';
+import utility from '../utility';
 
 class ChairState extends State
 {
@@ -38,58 +39,27 @@ class ChairState extends State
         1 byte => 8 bit
 
         ** GENOTYPE :
-        * -- Couleur (8 bits par couleurs : 0 - 255) 24 bits
-        * -- Width (8 bits : 0 - 255)
-        * -- Height (8 bits : 0 - 255)
-        * -- Depth (8 bits : 0 - 255)
+        * -- r/g/b (8 bits par couleurs : 0 - 255) 24 bits
+        * -- angle (0 - 90) 
         */
 
         this.chairBlueprint = new GenotypeBlueprint();
-        this.chairBlueprint.addTrait('r', 8, GenotypeBlueprint.INTEGER, 255, value => value / 255);
-        this.chairBlueprint.addTrait('g', 8, GenotypeBlueprint.INTEGER, 128, value => value / 255);
-        this.chairBlueprint.addTrait('b', 8, GenotypeBlueprint.INTEGER, 0, value => value / 255);
+        this.chairBlueprint.addTrait('r', 8, GenotypeBlueprint.INTEGER, 255, value => value / 256);
+        this.chairBlueprint.addTrait('g', 8, GenotypeBlueprint.INTEGER, 128, value => value / 256);
+        this.chairBlueprint.addTrait('b', 8, GenotypeBlueprint.INTEGER, 0, value => value / 256);
 
-        this.chairBlueprint.addTrait('width', 8, GenotypeBlueprint.INTEGER, 16);
-        this.chairBlueprint.addTrait('height', 8, GenotypeBlueprint.INTEGER, 16);
-        this.chairBlueprint.addTrait('depth', 8, GenotypeBlueprint.INTEGER, 16);
+        this.chairBlueprint.addTrait('thickness', 4, GenotypeBlueprint.INTEGER, 8);
+        this.chairBlueprint.addTrait('seatSize', 8, GenotypeBlueprint.INTEGER, 64);
+        this.chairBlueprint.addTrait('feetThickness', 4, GenotypeBlueprint.INTEGER, 4);
+        this.chairBlueprint.addTrait('feetHeight', 8, GenotypeBlueprint.INTEGER, 72);
+        this.chairBlueprint.addTrait('backHeight', 8, GenotypeBlueprint.INTEGER, 84);
+        this.chairBlueprint.addTrait('backAngle', 8, GenotypeBlueprint.INTEGER, (25 * 2**8) / 90, value => (value * 90) / 2**8);
 
         this.population = new Population(this.basePopulationCount, this.chairBlueprint.size, 0.0075);
         this.population.evaluate(this.chairBlueprint);
 
-        // this.show();
-        // this.loop();
-
-        const material = new THREE.MeshLambertMaterial({
-            color: new THREE.Color(0xffffff), 
-            transparent: true, 
-            opacity: 1.0
-        });
-
-        const cfv1 = new THREE.Mesh(new THREE.BoxGeometry(8, 72, 8), material);
-        
-        const cf1 = cfv1.clone();
-        const cf2 = cfv1.clone();
-        const cf3 = cfv1.clone();
-        const cf4 = cfv1.clone();
-
-        cf1.position.set(0, 0, 64);
-        cf2.position.set(64, 0, 64);
-        cf3.position.set(0, 0, 0);
-        cf4.position.set(64, 0, 0);
-
-        this.scene.add(cf1);
-        this.scene.add(cf2);
-        this.scene.add(cf3);
-        this.scene.add(cf4);
-
-        const p = new THREE.Mesh(new THREE.BoxGeometry(64 + 12, 8, 64 + 12), material);
-        p.position.set(32, 36, 32);
-        this.scene.add(p);
-
-        const d = new THREE.Mesh(new THREE.BoxGeometry(64 + 12, 96, 8), material);
-        d.position.set(32, 36 + 96 / 2, 0);
-        d.rotateOnAxis(new THREE.Vector3(1, 0, 0), -Math.PI / 20);
-        this.scene.add(d);
+        this.show();
+        this.loop();
     }
 
     loop() {
@@ -104,6 +74,44 @@ class ChairState extends State
         }, this.delay);
     }
 
+    createChair(data) {
+        const material = new THREE.MeshLambertMaterial({
+            color: new THREE.Color(data.r, data.g, data.b), 
+            transparent: true, 
+            opacity: 1.0
+        });
+        
+        const chair = new THREE.Group();
+        chair.shouldBeDeletedOnCleanUp = true;
+        chair.castShadow = true;
+        chair.receiveShadow = true;
+
+        const cf1 = new THREE.Mesh(new THREE.BoxGeometry(data.feetThickness, data.feetHeight, data.feetThickness), material);
+        const cf2 = cf1.clone();
+        const cf3 = cf1.clone();
+        const cf4 = cf1.clone();
+        cf1.position.set(data.feetThickness / 2, 0, data.seatSize - data.feetThickness / 2);
+        cf2.position.set(data.seatSize - data.feetThickness / 2, 0, data.seatSize - data.feetThickness / 2);
+        cf3.position.set(data.feetThickness / 2, 0, data.feetThickness / 2);
+        cf4.position.set(data.seatSize - data.feetThickness / 2, 0, data.feetThickness / 2);
+        chair.add(cf1);
+        chair.add(cf2);
+        chair.add(cf3);
+        chair.add(cf4);
+
+        const p = new THREE.Mesh(new THREE.BoxGeometry(data.seatSize, data.thickness, data.seatSize), material);
+        p.position.set(data.seatSize / 2, data.feetHeight / 2 + data.thickness / 2, data.seatSize / 2);
+        chair.add(p);
+
+        const d = new THREE.Mesh(new THREE.BoxGeometry(data.seatSize, data.backHeight, data.thickness), material);
+        d.geometry.translate(data.seatSize / 2, data.backHeight / 2, 0);
+        d.rotateX(-utility.degToRad(data.backAngle));
+        d.position.set(0, data.feetHeight / 2 + data.thickness / 2, data.thickness / 2);
+        chair.add(d);
+
+        return chair;
+    }
+
     /**
      * Place current population on a grid in 3d
      */
@@ -113,18 +121,7 @@ class ChairState extends State
 
         this.population.genotypes.forEach((genotype, i) => {
             const data = this.chairBlueprint.decode(genotype);
-            
-            const geometry = new THREE.BoxGeometry(data.width, data.height, data.depth);
-            const material = new THREE.MeshLambertMaterial({
-                color: new THREE.Color(data.r, data.g, data.b), 
-                transparent: true, 
-                opacity: 1.0
-            });
-
-            const object = new THREE.Mesh(geometry, material);
-            object.shouldBeDeletedOnCleanUp = true;
-            object.castShadow = true;
-            object.receiveShadow = true;
+            const object = this.createChair(data);
 
             const row = Math.floor(i / this.nbPerRow);
             const col = i % this.nbPerRow;
