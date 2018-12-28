@@ -8,9 +8,12 @@ class GenotypeBlueprint
     addTrait(name, min, max, type, value) {
         const size = Math.floor(Math.log2(max - min)) + 1;
         const target = new Uint8Array(size).fill(0);
+
         const transform = (x) => {
-            const n = 2**size;
-            return x * (max - min) / n + min;
+            const n = 2**size - 1;
+            const temp = x * (max - min) / n + min;
+            
+            return temp;
         };
 
         if (type === GenotypeBlueprint.INTEGER) {
@@ -41,7 +44,6 @@ class GenotypeBlueprint
 
     decode(genotype) {
         const out = {};
-
         let index = 0;
 
         for (let i = 0; i < this.genes.length; i++) {
