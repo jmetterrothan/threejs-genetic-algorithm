@@ -2,7 +2,6 @@ import * as THREE from 'three';
 
 import State from './State';
 import Population from '../Population';
-import Genotype from '../Genotype';
 import GenotypeBlueprint from '../GenotypeBlueprint';
 import utility from '../utility';
 
@@ -14,7 +13,7 @@ class ChairState extends State
         this.delay = 150;
         this.nbPerRow = 6;
         this.cellsize = 1000;
-        this.basePopulationCount = 36;
+        this.basePopulationCount = this.nbPerRow * this.nbPerRow;
     }
 
     init() {
@@ -24,9 +23,10 @@ class ChairState extends State
 
         // init scene
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.target.position.set(1, 0, 0);
         this.scene.add(directionalLight);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
         this.scene.add(ambientLight);
 
         const x = this.nbPerRow / 2 * this.cellsize;
@@ -48,14 +48,19 @@ class ChairState extends State
         this.chairBlueprint.addTrait('g', 0, 255, GenotypeBlueprint.INTEGER, 128);
         this.chairBlueprint.addTrait('b', 0, 255, GenotypeBlueprint.INTEGER, 0);
 
-        this.chairBlueprint.addTrait('thickness', 1, 10, GenotypeBlueprint.INTEGER, 8);
-        this.chairBlueprint.addTrait('seatSize', 1, 100, GenotypeBlueprint.INTEGER, 64);
+        this.chairBlueprint.addTrait('thickness', 1, 100, GenotypeBlueprint.INTEGER, 8);
+        this.chairBlueprint.addTrait('seatSize', 1, 160, GenotypeBlueprint.INTEGER, 64);
         this.chairBlueprint.addTrait('feetThickness', 1, 10, GenotypeBlueprint.INTEGER, 4);
         this.chairBlueprint.addTrait('feetHeight', 1, 100, GenotypeBlueprint.INTEGER, 72);
         this.chairBlueprint.addTrait('backHeight', 1, 100, GenotypeBlueprint.INTEGER, 84);
         this.chairBlueprint.addTrait('backAngle', 0, 90, GenotypeBlueprint.INTEGER, 25);
+        this.chairBlueprint.addTrait('f1', 0, 1, GenotypeBlueprint.INTEGER, 1);
+        this.chairBlueprint.addTrait('f2', 0, 1, GenotypeBlueprint.INTEGER, 1);
+        this.chairBlueprint.addTrait('f3', 0, 1, GenotypeBlueprint.INTEGER, 1);
+        this.chairBlueprint.addTrait('f4', 0, 1, GenotypeBlueprint.INTEGER, 1);
+        this.chairBlueprint.addTrait('f5', 0, 1, GenotypeBlueprint.INTEGER, 0);
 
-        this.population = new Population(this.basePopulationCount, this.chairBlueprint.size, 0.0075);
+        this.population = new Population(this.basePopulationCount, this.chairBlueprint.size, 0.0065);
         this.population.evaluate(this.chairBlueprint);
 
         this.show();
@@ -90,14 +95,19 @@ class ChairState extends State
         const cf2 = cf1.clone();
         const cf3 = cf1.clone();
         const cf4 = cf1.clone();
+        const cf5 = cf1.clone();
+
         cf1.position.set(data.feetThickness / 2, 0, data.seatSize - data.feetThickness / 2);
         cf2.position.set(data.seatSize - data.feetThickness / 2, 0, data.seatSize - data.feetThickness / 2);
         cf3.position.set(data.feetThickness / 2, 0, data.feetThickness / 2);
         cf4.position.set(data.seatSize - data.feetThickness / 2, 0, data.feetThickness / 2);
-        chair.add(cf1);
-        chair.add(cf2);
-        chair.add(cf3);
-        chair.add(cf4);
+        cf5.position.set(data.seatSize / 2, 0, data.seatSize / 2);
+
+        if (data.f1 === 1) chair.add(cf1);
+        if (data.f2 === 1) chair.add(cf2);
+        if (data.f3 === 1) chair.add(cf3);
+        if (data.f4 === 1) chair.add(cf4);
+        if (data.f5 === 1) chair.add(cf5);
 
         const p = new THREE.Mesh(new THREE.BoxGeometry(data.seatSize, data.thickness, data.seatSize), material);
         p.position.set(data.seatSize / 2, data.feetHeight / 2 + data.thickness / 2, data.seatSize / 2);
