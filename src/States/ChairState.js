@@ -44,16 +44,16 @@ class ChairState extends State
         */
 
         this.chairBlueprint = new GenotypeBlueprint();
-        this.chairBlueprint.addTrait('r', 8, GenotypeBlueprint.INTEGER, 255, value => value / 256);
-        this.chairBlueprint.addTrait('g', 8, GenotypeBlueprint.INTEGER, 128, value => value / 256);
-        this.chairBlueprint.addTrait('b', 8, GenotypeBlueprint.INTEGER, 0, value => value / 256);
+        this.chairBlueprint.addTrait('r', 0, 255, GenotypeBlueprint.INTEGER, 255);
+        this.chairBlueprint.addTrait('g', 0, 255, GenotypeBlueprint.INTEGER, 128);
+        this.chairBlueprint.addTrait('b', 0, 255, GenotypeBlueprint.INTEGER, 0);
 
-        this.chairBlueprint.addTrait('thickness', 4, GenotypeBlueprint.INTEGER, 8);
-        this.chairBlueprint.addTrait('seatSize', 8, GenotypeBlueprint.INTEGER, 64);
-        this.chairBlueprint.addTrait('feetThickness', 4, GenotypeBlueprint.INTEGER, 4);
-        this.chairBlueprint.addTrait('feetHeight', 8, GenotypeBlueprint.INTEGER, 72);
-        this.chairBlueprint.addTrait('backHeight', 8, GenotypeBlueprint.INTEGER, 84);
-        this.chairBlueprint.addTrait('backAngle', 8, GenotypeBlueprint.INTEGER, (25 * 2**8) / 90, value => (value * 90) / 2**8);
+        this.chairBlueprint.addTrait('thickness', 1, 10, GenotypeBlueprint.INTEGER, 8);
+        this.chairBlueprint.addTrait('seatSize', 1, 100, GenotypeBlueprint.INTEGER, 64);
+        this.chairBlueprint.addTrait('feetThickness', 1, 10, GenotypeBlueprint.INTEGER, 4);
+        this.chairBlueprint.addTrait('feetHeight', 1, 100, GenotypeBlueprint.INTEGER, 72);
+        this.chairBlueprint.addTrait('backHeight', 1, 100, GenotypeBlueprint.INTEGER, 84);
+        this.chairBlueprint.addTrait('backAngle', 0, 90, GenotypeBlueprint.INTEGER, 25);
 
         this.population = new Population(this.basePopulationCount, this.chairBlueprint.size, 0.0075);
         this.population.evaluate(this.chairBlueprint);
@@ -76,7 +76,7 @@ class ChairState extends State
 
     createChair(data) {
         const material = new THREE.MeshLambertMaterial({
-            color: new THREE.Color(data.r, data.g, data.b), 
+            color: new THREE.Color(data.r / 255, data.g / 255, data.b / 255), 
             transparent: true, 
             opacity: 1.0
         });

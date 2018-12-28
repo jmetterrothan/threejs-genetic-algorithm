@@ -5,9 +5,13 @@ class GenotypeBlueprint
         this.model = null;
     }
 
-    addTrait(name, min, max, type, value, transform = null) {
+    addTrait(name, min, max, type, value) {
         const size = Math.floor(Math.log2(max - min)) + 1;
         const target = new Uint8Array(size).fill(0);
+        const transform = (x) => {
+            const n = 2**size;
+            return x * (max - min) / n + min;
+        };
 
         if (type === GenotypeBlueprint.INTEGER) {
             const data = GenotypeBlueprint.convertIntegerToBinaryArray(value);
