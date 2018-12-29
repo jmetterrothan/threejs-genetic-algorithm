@@ -38,13 +38,13 @@ class Population
         this.evaluate(blueprint);
 
         const selection = this.selectBestCandidates(Math.floor(this.size / 2));
-        const target = this.hasTarget();
+        const targets = this.hasTargets();
 
         // algorithm failed
         if (selection.length <= 0) throw new Error('no candidates selected');
 
         // return the genotype that match our blueprint if he exists
-        if (target instanceof Genotype) return target;
+        if (targets.length >= 1) return targets;
 
         // children
         for (let i = 0, n = selection.length; i < n; i += 2) {
@@ -57,15 +57,15 @@ class Population
         // mutate
         this.genotypes = this.mutate(this.mutationRate, selection);
 
-        return null;
+        return [];
     }
 
     mutate(ratio, selection) {
         return Utility.shuffleArray(selection).map(genotype => genotype.mutate(ratio));
     }
 
-    hasTarget() {
-        return this.genotypes.find(genotype => genotype.score === 0);
+    hasTargets() {
+        return this.genotypes.filter(genotype => genotype.score === 0);
     }
 
     get size() {
