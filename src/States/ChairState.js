@@ -17,10 +17,6 @@ class ChairState extends State
     }
 
     init() {
-        this.layers = new THREE.Group();
-        this.layers.shouldBeDeletedOnCleanUp = true;
-        this.scene.add(this.layers);
-
         // init scene
         const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
         directionalLight.target.position.set(1, 0, 0);
@@ -34,31 +30,53 @@ class ChairState extends State
         const y = 0;
         this.wrapper.controls.getObject().position.set(x, y, z);
 
-        /* init algo 
+        // ui panel
+        this.ui = document.querySelector('.ui');
+        this.ui.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.wrapper.clean();
+            this.initPopulation();
+        });
+    }
 
-        1 byte => 8 bit
+    initPopulation() {
+        /* Init algo */
+        const uiR = parseInt(document.getElementById('uiR').value, 10);
+        const uiG = parseInt(document.getElementById('uiG').value, 10);
+        const uiB = parseInt(document.getElementById('uiB').value, 10);
+        const uiThickness = parseInt(document.getElementById('uiThickness').value, 10);
+        const uiSeatWidth = parseInt(document.getElementById('uiSeatWidth').value, 10);
+        const uiSeatDepth = parseInt(document.getElementById('uiSeatDepth').value, 10);
+        const uiFeetThickness = parseInt(document.getElementById('uiFeetThickness').value, 10);
+        const uiFeetHeight = parseInt(document.getElementById('uiFeetHeight').value, 10);
+        const uiBackHeight = parseInt(document.getElementById('uiBackHeight').value, 10);
+        const uiBackAngle = parseInt(document.getElementById('uiBackAngle').value, 10);
+        const uiF1 = document.getElementById('uiF1').checked ? 1 : 0;
+        const uiF2 = document.getElementById('uiF2').checked ? 1 : 0;
+        const uiF3 = document.getElementById('uiF3').checked ? 1 : 0;
+        const uiF4 = document.getElementById('uiF4').checked ? 1 : 0;
+        const uiF5 = document.getElementById('uiF5').checked ? 1 : 0;
 
-        ** GENOTYPE :
-        * -- r/g/b (8 bits par couleurs : 0 - 255) 24 bits
-        * -- angle (0 - 90) 
-        */
+        this.layers = new THREE.Group();
+        this.layers.shouldBeDeletedOnCleanUp = true;
+        this.scene.add(this.layers);
 
         this.chairBlueprint = new GenotypeBlueprint();
-        this.chairBlueprint.addTrait('r', 0, 255, GenotypeBlueprint.INTEGER, 255);
-        this.chairBlueprint.addTrait('g', 0, 255, GenotypeBlueprint.INTEGER, 128);
-        this.chairBlueprint.addTrait('b', 0, 255, GenotypeBlueprint.INTEGER, 0);
-
-        this.chairBlueprint.addTrait('thickness', 1, 100, GenotypeBlueprint.INTEGER, 8);
-        this.chairBlueprint.addTrait('seatSize', 1, 160, GenotypeBlueprint.INTEGER, 64);
-        this.chairBlueprint.addTrait('feetThickness', 1, 10, GenotypeBlueprint.INTEGER, 4);
-        this.chairBlueprint.addTrait('feetHeight', 1, 100, GenotypeBlueprint.INTEGER, 72);
-        this.chairBlueprint.addTrait('backHeight', 1, 100, GenotypeBlueprint.INTEGER, 84);
-        this.chairBlueprint.addTrait('backAngle', 0, 90, GenotypeBlueprint.INTEGER, 25);
-        this.chairBlueprint.addTrait('f1', 0, 1, GenotypeBlueprint.INTEGER, 1);
-        this.chairBlueprint.addTrait('f2', 0, 1, GenotypeBlueprint.INTEGER, 1);
-        this.chairBlueprint.addTrait('f3', 0, 1, GenotypeBlueprint.INTEGER, 1);
-        this.chairBlueprint.addTrait('f4', 0, 1, GenotypeBlueprint.INTEGER, 1);
-        this.chairBlueprint.addTrait('f5', 0, 1, GenotypeBlueprint.INTEGER, 0);
+        this.chairBlueprint.addTrait('r', 0, 255, GenotypeBlueprint.INTEGER, uiR);
+        this.chairBlueprint.addTrait('g', 0, 255, GenotypeBlueprint.INTEGER, uiG);
+        this.chairBlueprint.addTrait('b', 0, 255, GenotypeBlueprint.INTEGER, uiB);
+        this.chairBlueprint.addTrait('thickness', 1, 25, GenotypeBlueprint.INTEGER, uiThickness);
+        this.chairBlueprint.addTrait('seatWidth', 1, 150, GenotypeBlueprint.INTEGER, uiSeatWidth);
+        this.chairBlueprint.addTrait('seatDepth', 1, 150, GenotypeBlueprint.INTEGER, uiSeatDepth);
+        this.chairBlueprint.addTrait('feetThickness', 1, 10, GenotypeBlueprint.INTEGER, uiFeetThickness);
+        this.chairBlueprint.addTrait('feetHeight', 1, 100, GenotypeBlueprint.INTEGER, uiFeetHeight);
+        this.chairBlueprint.addTrait('backHeight', 1, 100, GenotypeBlueprint.INTEGER, uiBackHeight);
+        this.chairBlueprint.addTrait('backAngle', 0, 90, GenotypeBlueprint.INTEGER, uiBackAngle);
+        this.chairBlueprint.addTrait('f1', 0, 1, GenotypeBlueprint.INTEGER, uiF1);
+        this.chairBlueprint.addTrait('f2', 0, 1, GenotypeBlueprint.INTEGER, uiF2);
+        this.chairBlueprint.addTrait('f3', 0, 1, GenotypeBlueprint.INTEGER, uiF3);
+        this.chairBlueprint.addTrait('f4', 0, 1, GenotypeBlueprint.INTEGER, uiF4);
+        this.chairBlueprint.addTrait('f5', 0, 1, GenotypeBlueprint.INTEGER, uiF5);
 
         this.population = new Population(this.basePopulationCount, this.chairBlueprint.size, 0.0065);
         this.population.evaluate(this.chairBlueprint);
@@ -69,11 +87,11 @@ class ChairState extends State
 
     loop() {
         setTimeout(() => {
-            const target = this.population.select(this.chairBlueprint);
+            const targets = this.population.select(this.chairBlueprint);
             this.show();
 
             // stop loop if we found the target specimen
-            if (target === null) {
+            if (targets.length === 0) {
                 this.loop();
             }
         }, this.delay);
@@ -92,16 +110,17 @@ class ChairState extends State
         chair.receiveShadow = true;
 
         const cf1 = new THREE.Mesh(new THREE.BoxGeometry(data.feetThickness, data.feetHeight, data.feetThickness), material);
+        cf1.shouldBeDeletedOnCleanUp = true;
         const cf2 = cf1.clone();
         const cf3 = cf1.clone();
         const cf4 = cf1.clone();
         const cf5 = cf1.clone();
 
-        cf1.position.set(data.feetThickness / 2, 0, data.seatSize - data.feetThickness / 2);
-        cf2.position.set(data.seatSize - data.feetThickness / 2, 0, data.seatSize - data.feetThickness / 2);
+        cf1.position.set(data.feetThickness / 2, 0, data.seatDepth - data.feetThickness / 2);
+        cf2.position.set(data.seatWidth - data.feetThickness / 2, 0, data.seatDepth - data.feetThickness / 2);
         cf3.position.set(data.feetThickness / 2, 0, data.feetThickness / 2);
-        cf4.position.set(data.seatSize - data.feetThickness / 2, 0, data.feetThickness / 2);
-        cf5.position.set(data.seatSize / 2, 0, data.seatSize / 2);
+        cf4.position.set(data.seatWidth - data.feetThickness / 2, 0, data.feetThickness / 2);
+        cf5.position.set(data.seatWidth / 2 - data.feetThickness / 2, 0, data.seatDepth / 2 - data.feetThickness / 2);
 
         if (data.f1 === 1) chair.add(cf1);
         if (data.f2 === 1) chair.add(cf2);
@@ -109,12 +128,14 @@ class ChairState extends State
         if (data.f4 === 1) chair.add(cf4);
         if (data.f5 === 1) chair.add(cf5);
 
-        const p = new THREE.Mesh(new THREE.BoxGeometry(data.seatSize, data.thickness, data.seatSize), material);
-        p.position.set(data.seatSize / 2, data.feetHeight / 2 + data.thickness / 2, data.seatSize / 2);
+        const p = new THREE.Mesh(new THREE.BoxGeometry(data.seatWidth, data.thickness, data.seatDepth), material);
+        p.shouldBeDeletedOnCleanUp = true;
+        p.position.set(data.seatWidth / 2, data.feetHeight / 2 + data.thickness / 2, data.seatDepth / 2);
         chair.add(p);
 
-        const d = new THREE.Mesh(new THREE.BoxGeometry(data.seatSize, data.backHeight, data.thickness), material);
-        d.geometry.translate(data.seatSize / 2, data.backHeight / 2, 0);
+        const d = new THREE.Mesh(new THREE.BoxGeometry(data.seatWidth, data.backHeight, data.thickness), material);
+        d.shouldBeDeletedOnCleanUp = true;
+        d.geometry.translate(data.seatWidth / 2, data.backHeight / 2, 0);
         d.rotateX(-utility.degToRad(data.backAngle));
         d.position.set(0, data.feetHeight / 2 + data.thickness / 2, data.thickness / 2);
         chair.add(d);
@@ -137,7 +158,7 @@ class ChairState extends State
             const col = i % this.nbPerRow;
 
             const x = col * this.cellsize;
-            const y = 0;
+            const y = genotype.score === 0 ? 256 : 0;
             const z = row * this.cellsize;
 
             object.position.set(x, y, z);

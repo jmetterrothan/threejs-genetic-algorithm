@@ -78,7 +78,7 @@ class SceneWrapper {
             document.addEventListener('mozpointerlockerror', pointerlockerror, false);
             document.addEventListener('webkitpointerlockerror', pointerlockerror, false);
     
-            document.body.addEventListener('click', () => {
+            this.renderer.domElement.addEventListener('click', () => {
                 document.body.requestPointerLock = document.body.requestPointerLock 
                 || document.body.mozRequestPointerLock 
                 || document.body.webkitRequestPointerLock;
