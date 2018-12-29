@@ -57,6 +57,7 @@ class ChairState extends State
         const uiF4 = document.getElementById('uiF4').checked ? 1 : 0;
         const uiF5 = document.getElementById('uiF5').checked ? 1 : 0;
 
+        // Genotype setup
         this.layers = new THREE.Group();
         this.layers.shouldBeDeletedOnCleanUp = true;
         this.scene.add(this.layers);
@@ -85,9 +86,12 @@ class ChairState extends State
         this.loop();
     }
 
+    /**
+     * Makes a generation loop and schedules the next one
+     */
     loop() {
         setTimeout(() => {
-            const targets = this.population.select(this.chairBlueprint);
+            const targets = this.population.breed(this.chairBlueprint);
             this.show();
 
             // stop loop if we found the target specimen
@@ -97,6 +101,11 @@ class ChairState extends State
         }, this.delay);
     }
 
+    /**
+     * Create a chair model
+     * @param {Object} data Genotype parsed data
+     * @return {THREE.Group}
+     */
     createChair(data) {
         const material = new THREE.MeshLambertMaterial({
             color: new THREE.Color(data.r / 255, data.g / 255, data.b / 255), 
@@ -109,6 +118,7 @@ class ChairState extends State
         chair.castShadow = true;
         chair.receiveShadow = true;
 
+        // feet
         const cf1 = new THREE.Mesh(new THREE.BoxGeometry(data.feetThickness, data.feetHeight, data.feetThickness), material);
         cf1.shouldBeDeletedOnCleanUp = true;
         const cf2 = cf1.clone();
@@ -128,11 +138,13 @@ class ChairState extends State
         if (data.f4 === 1) chair.add(cf4);
         if (data.f5 === 1) chair.add(cf5);
 
+        // seat
         const p = new THREE.Mesh(new THREE.BoxGeometry(data.seatWidth, data.thickness, data.seatDepth), material);
         p.shouldBeDeletedOnCleanUp = true;
         p.position.set(data.seatWidth / 2, data.feetHeight / 2 + data.thickness / 2, data.seatDepth / 2);
         chair.add(p);
 
+        //  back
         const d = new THREE.Mesh(new THREE.BoxGeometry(data.seatWidth, data.backHeight, data.thickness), material);
         d.shouldBeDeletedOnCleanUp = true;
         d.geometry.translate(data.seatWidth / 2, data.backHeight / 2, 0);

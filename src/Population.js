@@ -6,6 +6,12 @@ import GenotypeBlueprint from './GenotypeBlueprint';
 
 class Population
 {
+    /**
+     * Population constructor
+     * @param {number} n Number of base organisms
+     * @param {number} size Number of bits that code for the genotype of the population
+     * @param {number} mutationRate Mutation rate
+     */
     constructor(n, size, mutationRate) {
         this.genotypes = Genotype.createPopulation(n, size);
         this.mutationRate = mutationRate;
@@ -29,11 +35,21 @@ class Population
         });
     }
 
+    /**
+     * Sort genotypes by their fitness
+     * @param {number} threshold 
+     * @return {Array<Genotype>} Sorted genotypes
+     */
     selectBestCandidates(threshold) {
         return this.genotypes.sort((a, b) => a.fitness - b.fitness).slice(0, threshold);
     }
 
-    select(blueprint) {
+    /**
+     * Breed a next generation of the population
+     * @param {GenotypeBlueprint} blueprint 
+     * @return {Array<Genotype>} Genotypes that match the blueprint for the current generation
+     */
+    breed(blueprint) {
         this.generation++;
         this.evaluate(blueprint);
 
@@ -60,14 +76,27 @@ class Population
         return [];
     }
 
+    /**
+     * Mutate a group of genotypes
+     * @param {number} ratio Mutation ratio
+     * @param {Array<Genotype>} selection Population to mutate
+     * @return {Array<Genotype>}
+     */
     mutate(ratio, selection) {
         return Utility.shuffleArray(selection).map(genotype => genotype.mutate(ratio));
     }
 
+    /**
+     * Check for genotypes with a perfect score in the population
+     * @return {Array<Genotype>}
+     */
     hasTargets() {
         return this.genotypes.filter(genotype => genotype.score === 0);
     }
 
+    /**
+     * @return {number}
+     */
     get size() {
         return this.genotypes.length;
     }

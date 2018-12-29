@@ -4,6 +4,10 @@ import GenotypeBlueprint from './GenotypeBlueprint';
 
 class Genotype
 {
+  /**
+   * Genotype constructor
+   * @param {Uint8Array} data Genotype bits
+   */
   constructor(data) {
     this.data = data;
     this.fitness = -1;
@@ -36,8 +40,8 @@ class Genotype
     const index = Math.floor(Math.random() * this.data.length);
 
     const out = new Array(2);
-    out[0] = new Genotype([...this.data.slice(0, index), ...genotype.data.slice(index)]);
-    out[1] = new Genotype([...genotype.data.slice(0, index), ...this.data.slice(index)]);
+    out[0] = new Genotype(Uint8Array.from([...this.data.slice(0, index), ...genotype.data.slice(index)]));
+    out[1] = new Genotype(Uint8Array.from([...genotype.data.slice(0, index), ...this.data.slice(index)]));
 
     return out; 
   }
@@ -82,6 +86,11 @@ class Genotype
     return new Array(n).fill(undefined).map(() => Genotype.create(size));
   }
 
+  /**
+   * Normalize dataset
+   * @param {Array} dataset
+   * @return {Array}
+   */
   static normalize(dataset) {
     const min = dataset.reduce((a, b) => Math.min(a, b));
     const max = dataset.reduce((a, b) => Math.max(a, b));
