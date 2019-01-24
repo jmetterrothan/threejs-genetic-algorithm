@@ -1,5 +1,4 @@
-# Algo génétique
+# Genetic algorithm
+Genetic algorithm implementation in JavaScript ES6, visualisation done with ThreeJS
 
-Jérémie Metter-Rothan - IMAC3
-
-Demo : [disponible ici](http://projects.metter-rothan.fr/genetic-threejs/)
+[DEMO HERE WITH A CHAIR MODEL](https://goo.gl/RkoYNP)
