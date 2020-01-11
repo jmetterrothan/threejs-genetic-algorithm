@@ -1,76 +1,86 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<title><%= htmlWebpackPlugin.options.title %></title>
-	</head>
-	<body>
-		<form class="ui">
-			<h4 class="ui__title">Ideal chair</h4>
-			<div class="ui__group">
-				<label>Red</label>
-				<input id="uiR" type="number" min="0" max="255" value="255" step="1">
-			</div>
-			<div class="ui__group">
-				<label>Green</label>
-				<input id="uiG" type="number" min="0" max="255" value="80" step="1">
-			</div>
-			<div class="ui__group">
-				<label>Blue</label>
-				<input id="uiB" type="number" min="0" max="255" value="0" step="1">
-			</div>
-			<div class="ui__group">
-				<label>Thickness</label>
-				<input id="uiThickness" type="number" min="1" max="25" value="8">
-			</div>
-			<div class="ui__group">
-				<label>Seat width</label>
-				<input id="uiSeatWidth" type="number" min="1" max="150" value="64">
-			</div>
-			<div class="ui__group">
-				<label>Seat depth</label>
-				<input id="uiSeatDepth" type="number" min="1" max="150" value="64">
-			</div>
-			<div class="ui__group">
-				<label>Feet thickness</label>
-				<input id="uiFeetThickness" type="number" min="1" max="10" value="4">
-			</div>
-			<div class="ui__group">
-				<label>Feet height</label>
-				<input id="uiFeetHeight" type="number" min="1" max="100" value="64">
-			</div>
-			<div class="ui__group">
-				<label>Back height</label>
-				<input id="uiBackHeight" type="number" min="1" max="100" value="72">
-			</div>
-			<div class="ui__group">
-				<label>Back angle</label>
-				<input id="uiBackAngle" type="number" min="0" max="90" value="25">
-			</div>
-			<div class="ui__group">
-				<label>Feet 1</label>
-				<input id="uiF1" type="checkbox" checked>
-			</div>
-			<div class="ui__group">
-				<label>Feet 2</label>
-				<input id="uiF2" type="checkbox" checked>
-			</div>
-			<div class="ui__group">
-				<label>Feet 3</label>
-				<input id="uiF3" type="checkbox" checked>
-			</div>
-			<div class="ui__group">
-				<label>Feet 4</label>
-				<input id="uiF4" type="checkbox" checked>
-			</div>
-			<div class="ui__group">
-				<label>Feet 5</label>
-				<input id="uiF5" type="checkbox">
-			</div>
-			<hr>
-			<div class="ui__group">
-				<button id="uiToggleBtn" class="btn" type="submit">Start simulation</button>
-			</div>
-		</form>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+  </head>
+  <body>
+    <form class="ui">
+      <h4 class="ui__title">Ideal chair</h4>
+      <div class="ui__group">
+        <label>Red</label>
+        <input id="uiR" type="number" min="0" max="255" value="255" step="1" />
+      </div>
+      <div class="ui__group">
+        <label>Green</label>
+        <input id="uiG" type="number" min="0" max="255" value="100" step="1" />
+      </div>
+      <div class="ui__group">
+        <label>Blue</label>
+        <input id="uiB" type="number" min="0" max="255" value="120" step="1" />
+      </div>
+      <div class="ui__group">
+        <label>Seat thickness</label>
+        <input id="uiSeatThickness" type="number" min="1" max="25" value="8" />
+      </div>
+      <div class="ui__group">
+        <label>Back thickness</label>
+        <input id="uiBackThickness" type="number" min="1" max="25" value="8" />
+      </div>
+      <div class="ui__group">
+        <label>Seat width</label>
+        <input id="uiSeatWidth" type="number" min="1" max="255" value="64" />
+      </div>
+      <div class="ui__group">
+        <label>Seat depth</label>
+        <input id="uiSeatDepth" type="number" min="1" max="255" value="64" />
+      </div>
+      <div class="ui__group">
+        <label>Feet thickness</label>
+        <input id="uiFeetThickness" type="number" min="1" max="10" value="4" />
+      </div>
+      <div class="ui__group">
+        <label>Feet height</label>
+        <input id="uiFeetHeight" type="number" min="1" max="100" value="64" />
+      </div>
+      <div class="ui__group">
+        <label>Back height</label>
+        <input id="uiBackHeight" type="number" min="1" max="100" value="72" />
+      </div>
+      <div class="ui__group">
+        <label>Back angle</label>
+        <input id="uiBackAngle" type="number" min="0" max="90" value="25" />
+      </div>
+      <div class="ui__group">
+        <label>Feet 1</label>
+        <input id="uiF1" type="checkbox" checked />
+      </div>
+      <div class="ui__group">
+        <label>Feet 2</label>
+        <input id="uiF2" type="checkbox" checked />
+      </div>
+      <div class="ui__group">
+        <label>Feet 3</label>
+        <input id="uiF3" type="checkbox" checked />
+      </div>
+      <div class="ui__group">
+        <label>Feet 4</label>
+        <input id="uiF4" type="checkbox" checked />
+      </div>
+      <div class="ui__group">
+        <label>Feet 5</label>
+        <input id="uiF5" type="checkbox" />
+      </div>
+      <div class="ui__group">
+        <label>Back</label>
+        <input id="uiB1" type="checkbox" checked />
+      </div>
+      <hr />
+      <div class="ui__group">
+        <button id="uiToggleBtn" class="btn" type="submit">
+          Start simulation
+        </button>
+      </div>
+    </form>
+  </body>
 </html>
