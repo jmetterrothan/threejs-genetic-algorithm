@@ -1,31 +1,30 @@
+import assert from "assert";
+import GenotypeBlueprint from "./GenotypeBlueprint";
 
-import assert from 'assert';
-import GenotypeBlueprint from './GenotypeBlueprint';
-
-class Genotype
-{
+class Genotype {
   /**
    * Genotype constructor
    * @param {Uint8Array} data Genotype bits
    */
-  constructor(data) {
+  constructor(data, generation = 0) {
     this.data = data;
     this.fitness = -1;
     this.score = -1;
+    this.generation = generation;
   }
 
   /**
    * Mutate genotypes
    * @param {number} p Mutation chance
-   * @return {Genotype} mutated phenotype 
+   * @return {Genotype} mutated phenotype
    */
-  mutate(p){
-    const temp = this.data.map(bit => {
+  mutate(p) {
+    const temp = new Uint8Array(this.data).map(bit => {
       if (Math.random() >= 1 - p) return bit === 1 ? 0 : 1;
       return bit;
     });
 
-    return new Genotype(temp);
+    return new Genotype(temp, this.generation);
   }
 
   /**
@@ -34,16 +33,31 @@ class Genotype
    * @return {Array<Genotype>} Siblings
    */
   crossWith(genotype) {
-    assert(genotype instanceof Genotype, 'You must provide a genotype to cross with');
-    assert(this.data.length === genotype.data.length, 'Incompatible genotypes');
-    
+    assert(
+      genotype instanceof Genotype,
+      "You must provide a genotype to cross with"
+    );
+    assert(this.data.length === genotype.data.length, "Incompatible genotypes");
+
     const index = Math.floor(Math.random() * this.data.length);
 
     const out = new Array(2);
-    out[0] = new Genotype(Uint8Array.from([...this.data.slice(0, index), ...genotype.data.slice(index)]));
-    out[1] = new Genotype(Uint8Array.from([...genotype.data.slice(0, index), ...this.data.slice(index)]));
+    out[0] = new Genotype(
+      Uint8Array.from([
+        ...this.data.slice(0, index),
+        ...genotype.data.slice(index)
+      ]),
+      genotype.generation + 1
+    );
+    out[1] = new Genotype(
+      Uint8Array.from([
+        ...genotype.data.slice(0, index),
+        ...this.data.slice(index)
+      ]),
+      genotype.generation + 1
+    );
 
-    return out; 
+    return out;
   }
 
   /**
@@ -51,29 +65,43 @@ class Genotype
    * @param {GenotypeBlueprint} blueprint
    * @return {number} fitness score
    */
-  evaluate (blueprint) {
-    assert(blueprint instanceof GenotypeBlueprint, 'Blueprint must be an instanceof GenotypeBlueprint');
-    assert(this.data.length === blueprint.model.length, 'Incompatible model');
+  evaluate(blueprint) {
+    assert(
+      blueprint instanceof GenotypeBlueprint,
+      "Blueprint must be an instanceof GenotypeBlueprint"
+    );
+    assert(this.data.length === blueprint.model.length, "Incompatible model");
 
-    return blueprint.model.reduce((acc, val, i) => acc + (this.data[i] !== val ? 1 : 0), 0);
+    return blueprint.model.reduce(
+      (acc, val, i) => acc + (this.data[i] !== val ? 1 : 0),
+      0
+    );
+  }
+
+  /**
+   * Copy a genotype
+   * @return Genotype
+   */
+  clone() {
+    return new Genotype(Uint8Array.from([...this.data]), this.generation);
   }
 
   /**
    * Creates a random genotype
    * @param {number} size Number of bits
-   * @return {Genotype} 
+   * @return {Genotype}
    */
   static create(size) {
-    return new Genotype(Genotype.createRandomData(size).next().value);
+    return new Genotype(Genotype.createRandomData(size).next().value, 0);
   }
 
   /**
    * Creates a random genotype data set
    * @param {number} size Number of bits
-   * @return {IterableIterator<Uint8Array>} 
+   * @return {IterableIterator<Uint8Array>}
    */
-  static * createRandomData(size) {
-    yield new Uint8Array(size).map(() => Math.random() >= 0.5 ? 0 : 1);
+  static *createRandomData(size) {
+    yield new Uint8Array(size).map(() => (Math.random() >= 0.5 ? 0 : 1));
   }
 
   /**
@@ -94,7 +122,7 @@ class Genotype
   static normalize(dataset) {
     const min = dataset.reduce((a, b) => Math.min(a, b));
     const max = dataset.reduce((a, b) => Math.max(a, b));
-  
+
     return dataset.map(val => (val - min) / (max - min));
   }
 }
