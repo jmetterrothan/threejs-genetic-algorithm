@@ -40,7 +40,7 @@ class SceneWrapper {
         this.scene.add(this.controls.getObject());
 
         // Scene basic setup
-        this.renderer.setClearColor(0x000000);
+        this.renderer.setClearColor(0x252730, 1);
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.setPixelRatio(window.devicePixelRatio || 1);
