@@ -36,18 +36,17 @@ class ChairState extends State {
   }
 
   run() {
-    this.show(this.population, false);
-
-    const next = this.population.breed();
-    next.evaluate(this.blueprint);
-
     const targets = this.population.hasTargets();
     // stop loop if we found the target specimen
     if (targets.length === 0) {
+      this.show(this.population, false);
+
+      const next = this.population.breed();
+      next.evaluate(this.blueprint);
       this.population = next;
       this.run();
     } else {
-      this.show(next, true);
+      this.show(this.population, true);
     }
   }
 
@@ -192,7 +191,7 @@ class ChairState extends State {
     this.blueprint.addTrait("f5", 0, 1, GenotypeBlueprint.INTEGER, uiF5);
     this.blueprint.addTrait("b1", 0, 1, GenotypeBlueprint.INTEGER, uiB1);
 
-    this.population = Population.create(64, this.blueprint.size, 0.0001);
+    this.population = Population.create(64, this.blueprint.size, 0.001);
     this.population.evaluate(this.blueprint);
   }
 
@@ -299,7 +298,7 @@ class ChairState extends State {
    * @param Population population
    */
   show(population, f = false) {
-    if (!f && population.generation % 20 !== 0) {
+    if (!f && population.generation % 5 !== 0) {
       return;
     }
 
@@ -314,11 +313,6 @@ class ChairState extends State {
       return;
     }
 
-    console.table({
-      generation: mostFitIndividual.generation,
-      score: mostFitIndividual.score
-    });
-
     // display the 3d chair object
     const data = this.blueprint.decode(mostFitIndividual);
     const object = this.createChair(data);
@@ -327,7 +321,6 @@ class ChairState extends State {
     const box = new THREE.Box3().setFromObject(object);
     const size = box.getSize(new THREE.Vector3());
     const w = size.x;
-    const h = size.y;
     const d = size.z;
 
     const x =
@@ -356,19 +349,17 @@ class ChairState extends State {
     titleTag.position.set(x + w / 2, y + 200, z);
     group.add(titleTag);
 
-    const subtitleTag = new SpriteText2D(
-      `(Score = ${mostFitIndividual.score})`,
-      {
-        align: textAlign.center,
-        font: "bold 12px Arial",
-        fillStyle: "#dadada",
-        antialias: true,
-        shadowColor: "rgba(0, 0, 0, 0.2)",
-        shadowBlur: 3,
-        shadowOffsetX: 2,
-        shadowOffsetY: 2
-      }
-    );
+    const score = (mostFitIndividual.score * 100).toFixed();
+    const subtitleTag = new SpriteText2D(`(Score : ${score}%)`, {
+      align: textAlign.center,
+      font: "bold 12px Arial",
+      fillStyle: "#dadada",
+      antialias: true,
+      shadowColor: "rgba(0, 0, 0, 0.2)",
+      shadowBlur: 3,
+      shadowOffsetX: 2,
+      shadowOffsetY: 2
+    });
 
     subtitleTag.material.alphaTest = 0.1;
     subtitleTag.position.set(x + w / 2, y + 200 - 20, z);
