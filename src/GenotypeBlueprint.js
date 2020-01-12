@@ -1,5 +1,10 @@
 import Genotype from './Genotype';
 
+export const BlueprintFormTypes = {
+    NUMBER: 1,
+    BOOLEAN: 2
+  };
+
 class GenotypeBlueprint
 {
     /**
@@ -27,12 +32,10 @@ class GenotypeBlueprint
             return x * (max - min) / n + min;
         };
 
-        if (type === GenotypeBlueprint.INTEGER) {
-            const data = GenotypeBlueprint.convertIntegerToBinaryArray(value);
-            
-            for (let i = data.length; i >= 0; --i) {
-                target[size - (data.length - i)] = data[i];
-            }
+        const data = GenotypeBlueprint.convertIntegerToBinaryArray(value);
+        
+        for (let i = data.length; i >= 0; --i) {
+            target[size - (data.length - i)] = data[i];
         }
 
         this.genes.push({ name, min, max, size, type, target, transform });
@@ -70,9 +73,7 @@ class GenotypeBlueprint
             let temp = genotype.data.slice(index, index + this.genes[i].size);
 
             // convert raw binary values
-            if (this.genes[i].type === GenotypeBlueprint.INTEGER) {
-                value = GenotypeBlueprint.convertBinaryArrayToInteger(temp);
-            }
+            value = GenotypeBlueprint.convertBinaryArrayToInteger(temp);
 
             // transform values
             if (typeof this.genes[i].transform === 'function') {
@@ -111,7 +112,5 @@ class GenotypeBlueprint
         return Uint8Array.from(Number(value).toString(2).split('').map(str => parseInt(str, 10)));
     }
 }
-
-GenotypeBlueprint.INTEGER = 1;
 
 export default GenotypeBlueprint;
