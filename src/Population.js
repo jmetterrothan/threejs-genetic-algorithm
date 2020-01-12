@@ -49,7 +49,7 @@ class Population {
    * @param {number} method
    * @return {Array<Genotype>} Sorted genotypes
    */
-  selectBestCandidates(threshold, method = SelectionMethods.TOURNAMENT) {
+  selectBestCandidates(threshold, method = SelectionMethods.TRUNCATION) {
     if (method === SelectionMethods.TRUNCATION) {
       return this.genotypes
         .sort((a, b) => b.fitness - a.fitness)
@@ -123,12 +123,17 @@ class Population {
   /**
    * Population constructor
    * @param {number} n Number of base organisms
-   * @param {number} size Number of bits that code for the genotype of the population
    * @param {number} mutationRate Mutation rate
+   * @param {GenotypeBlueprint} blueprint
    * @return {Population}
    */
-  static create(n, size, mutationRate) {
-    return new Population(Genotype.createPopulation(n, size), mutationRate);
+  static create(n, mutationRate, blueprint) {
+    const population = new Population(
+      Genotype.createPopulation(n, blueprint.size),
+      mutationRate
+    );
+    population.evaluate(blueprint);
+    return population;
   }
 
   /**
