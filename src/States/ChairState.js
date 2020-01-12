@@ -11,13 +11,25 @@ class ChairState extends State {
   constructor(sceneWrapper) {
     super(sceneWrapper);
 
-    this.offset = 0;
-    this.gridSize = 15000;
-    this.gridDivisions = 40;
-    this.gridCellSize = this.gridSize / this.gridDivisions;
+    this.gridCellSize = 375; // size of each cells in the grid
+    this.gridDivisions = 100; // number of grid subdivisions
+    this.gridOffset = 0; // grid offset
+    this.generationDivisor = 5; // show every X generations only
   }
 
   init() {
+    // ui panel
+    this.ui = document.querySelector(".ui");
+    this.ui.addEventListener("submit", e => {
+      e.preventDefault();
+      this.start();
+    });
+
+    this.initScene();
+    this.initGrid();
+  }
+
+  initScene() {
     // init scene
     const directionalLight = new THREE.DirectionalLight(0xffffff, 0.65);
     directionalLight.target.position.set(1, 0, 0);
@@ -25,32 +37,42 @@ class ChairState extends State {
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
     this.scene.add(ambientLight);
+  }
 
-    // ui panel
-    this.ui = document.querySelector(".ui");
-    this.ui.addEventListener("submit", e => {
-      e.preventDefault();
-      this.offset = 0;
-      this.start();
+  /**
+   * Generate a baseline grid
+   */
+  initGrid() {
+    const group = new THREE.Group();
+
+    const grid = new THREE.GridHelper(
+      this.gridCellSize * this.gridDivisions,
+      this.gridDivisions,
+      0x202026,
+      0x202026
+    );
+    grid.translateY(1);
+    group.add(grid);
+
+    const geo = new THREE.PlaneBufferGeometry(
+      this.gridCellSize * this.gridDivisions,
+      this.gridCellSize * this.gridDivisions,
+      this.gridDivisions,
+      this.gridDivisions
+    );
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0x101013,
+      side: THREE.DoubleSide
     });
+
+    const plane = new THREE.Mesh(geo, mat);
+    plane.rotateX(-Math.PI / 2);
+    group.add(plane);
+
+    this.scene.add(group);
   }
 
-  run() {
-    const targets = this.population.hasTargets();
-    // stop loop if we found the target specimen
-    if (targets.length === 0) {
-      this.show(this.population, false);
-
-      const next = this.population.breed();
-      next.evaluate(this.blueprint);
-      this.population = next;
-      this.run();
-    } else {
-      this.show(this.population, true);
-    }
-  }
-
-  initPopulation() {
+  createBlueprint() {
     /* Init algo */
     const uiR = parseInt(document.getElementById("uiR").value, 10);
     const uiG = parseInt(document.getElementById("uiG").value, 10);
@@ -95,35 +117,6 @@ class ChairState extends State {
     const uiB1 = document.getElementById("uiB1").checked ? 1 : 0;
 
     // Genotype setup
-    this.layers = new THREE.Group();
-    this.layers.shouldBeDeletedOnCleanUp = true;
-    this.scene.add(this.layers);
-
-    const grid = new THREE.GridHelper(
-      this.gridSize,
-      this.gridDivisions,
-      0x202026,
-      0x202026
-    );
-
-    grid.translateY(1);
-    this.scene.add(grid);
-
-    var geo = new THREE.PlaneBufferGeometry(
-      this.gridSize,
-      this.gridSize,
-      this.gridDivisions,
-      this.gridDivisions
-    );
-    var mat = new THREE.MeshBasicMaterial({
-      color: 0x101013,
-      side: THREE.DoubleSide
-    });
-    var plane = new THREE.Mesh(geo, mat);
-    plane.rotateX(-Math.PI / 2);
-
-    this.scene.add(plane);
-
     this.blueprint = new GenotypeBlueprint();
     this.blueprint.addTrait("r", 0, 255, GenotypeBlueprint.INTEGER, uiR);
     this.blueprint.addTrait("g", 0, 255, GenotypeBlueprint.INTEGER, uiG);
@@ -145,35 +138,35 @@ class ChairState extends State {
     this.blueprint.addTrait(
       "seatWidth",
       1,
-      150,
+      255,
       GenotypeBlueprint.INTEGER,
       uiSeatWidth
     );
     this.blueprint.addTrait(
       "seatDepth",
       1,
-      150,
+      255,
       GenotypeBlueprint.INTEGER,
       uiSeatDepth
     );
     this.blueprint.addTrait(
       "feetThickness",
       1,
-      10,
+      12,
       GenotypeBlueprint.INTEGER,
       uiFeetThickness
     );
     this.blueprint.addTrait(
       "feetHeight",
       1,
-      100,
+      255,
       GenotypeBlueprint.INTEGER,
       uiFeetHeight
     );
     this.blueprint.addTrait(
       "backHeight",
       1,
-      100,
+      255,
       GenotypeBlueprint.INTEGER,
       uiBackHeight
     );
@@ -190,9 +183,10 @@ class ChairState extends State {
     this.blueprint.addTrait("f4", 0, 1, GenotypeBlueprint.INTEGER, uiF4);
     this.blueprint.addTrait("f5", 0, 1, GenotypeBlueprint.INTEGER, uiF5);
     this.blueprint.addTrait("b1", 0, 1, GenotypeBlueprint.INTEGER, uiB1);
+  }
 
-    this.population = Population.create(64, this.blueprint.size, 0.001);
-    this.population.evaluate(this.blueprint);
+  createBasePopulation() {
+    this.population = Population.create(64, 0.001, this.blueprint);
   }
 
   /**
@@ -295,10 +289,11 @@ class ChairState extends State {
 
   /**
    * Place current population on a grid in 3d
-   * @param Population population
+   * @param {Population} population
+   * @param {boolean} force
    */
-  show(population, f = false) {
-    if (!f && population.generation % 5 !== 0) {
+  show(population, force = false) {
+    if (!force && population.generation % this.generationDivisor !== 0) {
       return;
     }
 
@@ -316,22 +311,21 @@ class ChairState extends State {
     // display the 3d chair object
     const data = this.blueprint.decode(mostFitIndividual);
     const object = this.createChair(data);
-    // object.geometry.computeBoundingBox();
 
     const box = new THREE.Box3().setFromObject(object);
     const size = box.getSize(new THREE.Vector3());
-    const w = size.x;
-    const d = size.z;
+
+    const bbW = size.x;
+    const bbH = size.y;
+    const bbD = size.z;
 
     const x =
-      this.gridSize / 2 -
-      this.offset * this.gridCellSize -
-      this.gridCellSize / 2 -
-      w / 2;
+      this.gridOffset * this.gridCellSize - this.gridCellSize / 2 - bbW / 2;
     const y = data.feetHeight / 2;
-    const z = -this.gridCellSize / 2 - d / 2;
+    const z = -this.gridCellSize / 2 - bbD / 2;
 
     object.position.set(x, y, z);
+    group.add(object);
 
     // tags
     const titleTag = new SpriteText2D(`Generation ${population.generation}`, {
@@ -346,7 +340,7 @@ class ChairState extends State {
     });
 
     titleTag.material.alphaTest = 0.1;
-    titleTag.position.set(x + w / 2, y + 200, z);
+    titleTag.position.set(x + bbW / 2, y + (bbH + 50), z);
     group.add(titleTag);
 
     const score = (mostFitIndividual.score * 100).toFixed();
@@ -362,13 +356,45 @@ class ChairState extends State {
     });
 
     subtitleTag.material.alphaTest = 0.1;
-    subtitleTag.position.set(x + w / 2, y + 200 - 20, z);
+    subtitleTag.position.set(x + bbW / 2, y + (bbH + 50) - 20, z);
     group.add(subtitleTag);
 
-    group.add(object);
-
-    this.offset++;
+    this.gridOffset++;
     this.layers.add(group);
+  }
+
+  start() {
+    this.gridOffset = 0;
+
+    this.wrapper.clean();
+
+    this.createBlueprint();
+    this.createBasePopulation();
+
+    this.layers = new THREE.Group();
+    this.layers.shouldBeDeletedOnCleanUp = true;
+    this.scene.add(this.layers);
+
+    this.run();
+  }
+
+  update() {}
+
+  onResize() {}
+
+  run() {
+    const targets = this.population.hasTargets();
+    // stop loop if we found the target specimen
+    if (targets.length === 0) {
+      this.show(this.population, false);
+
+      const next = this.population.breed();
+      next.evaluate(this.blueprint);
+      this.population = next;
+      this.run();
+    } else {
+      this.show(this.population, true);
+    }
   }
 }
 
