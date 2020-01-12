@@ -243,7 +243,13 @@ class ChairState extends State {
       genotype => genotype.fitness === 1
     );
 
-    if (!mostFitIndividual || this.previousScore === mostFitIndividual.score) {
+    if (!mostFitIndividual) {
+      return;
+    }
+
+    const score = (mostFitIndividual.score * 100).toFixed();
+
+    if (this.previousScore === score) {
       return;
     }
 
@@ -252,9 +258,8 @@ class ChairState extends State {
 
     // display the 3d chair object
     const chair = ChairObject.fromGenotype(this.blueprint, mostFitIndividual);
-    const score = (mostFitIndividual.score * 100).toFixed();
 
-    this.placeOnGrid(chair, this.gridOffset, 0, true);
+    this.placeOnGrid(chair, this.gridOffset - 2, -4, true);
 
     chair.addTitle(
       `Generation ${population.generation}`,
@@ -264,7 +269,7 @@ class ChairState extends State {
     chair.addSubtitle(`(Score : ${score}%)`);
 
     this.gridOffset++;
-    this.previousScore = mostFitIndividual.score;
+    this.previousScore = score;
     this.layers.add(group);
   }
 
