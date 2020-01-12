@@ -4,12 +4,16 @@ import Utility from "./utility";
 import Genotype from "./Genotype";
 import GenotypeBlueprint from "./GenotypeBlueprint";
 
+export const SelectionMethods = {
+  TOURNAMENT: 1,
+  TRUNCATION: 2
+};
+
 class Population {
   /**
    * Population constructor
    * @param {Array<Genotype>} genotypes Pool of genotypes
    * @param {number} mutationRate Mutation rate
-   * @param {number} generation Current generation
    */
   constructor(genotypes, mutationRate, generation = 0) {
     this.genotypes = genotypes;
@@ -34,7 +38,7 @@ class Population {
     const normalizedResults = Genotype.normalize(results);
 
     this.genotypes.forEach((genotype, i) => {
-      genotype.score = results[i];
+      genotype.score = results[i] / blueprint.size;
       genotype.fitness = normalizedResults[i];
     });
   }
@@ -42,13 +46,34 @@ class Population {
   /**
    * Sort genotypes by their fitness
    * @param {number} threshold
+   * @param {number} method
    * @return {Array<Genotype>} Sorted genotypes
    */
-  selectBestCandidates(threshold) {
-    return this.genotypes
-      .sort((a, b) => a.fitness - b.fitness)
-      .slice(0, threshold)
-      .map(genotype => genotype.clone());
+  selectBestCandidates(threshold, method = SelectionMethods.TOURNAMENT) {
+    if (method === SelectionMethods.TRUNCATION) {
+      return this.genotypes
+        .sort((a, b) => b.fitness - a.fitness)
+        .slice(0, threshold)
+        .map(genotype => genotype.clone());
+    } else if (method === SelectionMethods.TOURNAMENT) {
+      const output = [];
+
+      while (output.length < threshold) {
+        const selected = Utility.shuffleArray(this.genotypes).slice(0, 4);
+        output.push(
+          selected.reduce((acc, element) => {
+            if (!acc || acc.fitness < element.fitness) {
+              return element;
+            }
+            return acc;
+          }, null)
+        );
+      }
+
+      return output;
+    }
+
+    throw new Error("Invalid selection method");
   }
 
   /**
@@ -82,7 +107,7 @@ class Population {
    * @return {Array<Genotype>}
    */
   mutate(ratio, selection) {
-    return Utility.shuffleArray(selection).map(genotype =>
+    return Utility.shuffleArray([...selection]).map(genotype =>
       genotype.mutate(ratio)
     );
   }
@@ -92,7 +117,7 @@ class Population {
    * @return {Array<Genotype>}
    */
   hasTargets() {
-    return this.genotypes.filter(genotype => genotype.score === 0);
+    return this.genotypes.filter(genotype => genotype.score === 1);
   }
 
   /**
