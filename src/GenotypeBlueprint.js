@@ -112,6 +112,6 @@ class GenotypeBlueprint
     }
 }
 
-GenotypeBlueprint.INTEGER = 0;
+GenotypeBlueprint.INTEGER = 1;
 
 export default GenotypeBlueprint;
