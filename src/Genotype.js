@@ -6,11 +6,10 @@ class Genotype {
    * Genotype constructor
    * @param {Uint8Array} data Genotype bits
    */
-  constructor(data, generation = 0) {
+  constructor(data) {
     this.data = data;
     this.fitness = -1;
     this.score = -1;
-    this.generation = generation;
   }
 
   /**
@@ -24,7 +23,7 @@ class Genotype {
       return bit;
     });
 
-    return new Genotype(temp, this.generation);
+    return new Genotype(temp);
   }
 
   /**
@@ -46,15 +45,13 @@ class Genotype {
       Uint8Array.from([
         ...this.data.slice(0, index),
         ...genotype.data.slice(index)
-      ]),
-      genotype.generation + 1
+      ])
     );
     out[1] = new Genotype(
       Uint8Array.from([
         ...genotype.data.slice(0, index),
         ...this.data.slice(index)
-      ]),
-      genotype.generation + 1
+      ])
     );
 
     return out;
@@ -73,7 +70,7 @@ class Genotype {
     assert(this.data.length === blueprint.model.length, "Incompatible model");
 
     return blueprint.model.reduce(
-      (acc, val, i) => acc + (this.data[i] !== val ? 1 : 0),
+      (acc, val, i) => acc + (this.data[i] !== val ? 0 : 1),
       0
     );
   }
@@ -83,7 +80,7 @@ class Genotype {
    * @return Genotype
    */
   clone() {
-    return new Genotype(Uint8Array.from([...this.data]), this.generation);
+    return new Genotype(Uint8Array.from([...this.data]));
   }
 
   /**
@@ -92,7 +89,7 @@ class Genotype {
    * @return {Genotype}
    */
   static create(size) {
-    return new Genotype(Genotype.createRandomData(size).next().value, 0);
+    return new Genotype(Genotype.createRandomData(size).next().value);
   }
 
   /**
@@ -101,7 +98,7 @@ class Genotype {
    * @return {IterableIterator<Uint8Array>}
    */
   static *createRandomData(size) {
-    yield new Uint8Array(size).map(() => (Math.random() >= 0.5 ? 0 : 1));
+    yield new Uint8Array(size).map(() => (Math.random() > 0.5 ? 0 : 1));
   }
 
   /**
@@ -111,7 +108,7 @@ class Genotype {
    * @return {Array<Genotype>}
    */
   static createPopulation(n, size) {
-    return new Array(n).fill(undefined).map(() => Genotype.create(size));
+    return new Array(n).fill(null).map(() => Genotype.create(size));
   }
 
   /**
