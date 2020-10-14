@@ -1,4 +1,1 @@
-# Genetic algorithm
-Genetic algorithm implementation in JavaScript ES6, visualisation done with ThreeJS
-
-[DEMO HERE WITH A CHAIR MODEL](https://goo.gl/RkoYNP)
+Genetic algorithm implementation in JavaScript ES6, visualisation done with ThreeJS using a 3d model of a chair.
